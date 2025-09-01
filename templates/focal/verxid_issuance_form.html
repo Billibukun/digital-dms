@@ -1,0 +1,814 @@
+{% extends "base.html" %}
+
+{% block title %}VERXID Device Issuance Form - VERXID System{% endblock %}
+
+{% block extra_css %}
+<style>
+.signature-pad {
+    border: 2px dashed #dee2e6;
+    border-radius: 0.375rem;
+    cursor: crosshair;
+    background: #fff;
+}
+
+.signature-pad:hover {
+    border-color: #0d6efd;
+    background: #f8f9ff;
+}
+
+.form-section {
+    background: #f8f9fa;
+    border-left: 4px solid #0d6efd;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-section h5 {
+    color: #0d6efd;
+    margin-bottom: 1rem;
+}
+
+.accessory-counter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.counter-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.counter-btn:hover {
+    background: #f8f9fa;
+    border-color: #0d6efd;
+}
+
+.counter-display {
+    width: 50px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.terms-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    background: #fff;
+}
+
+.terms-list {
+    list-style: none;
+    padding: 0;
+}
+
+.terms-list li {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 0.375rem;
+    border-left: 3px solid #0d6efd;
+}
+
+.signature-section {
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background: #fff;
+}
+
+.signature-section.active {
+    border-color: #0d6efd;
+    background: #f8f9ff;
+}
+
+.signature-controls {
+    margin-top: 0.5rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .signature-pad {
+        border: 1px solid #000;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-4 no-print">
+            <a href="{{ url_for('algon_dashboard') }}" class="btn btn-outline-secondary me-3">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h2><i class="fas fa-file-alt me-2"></i>VERXID Device Issuance Form</h2>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">VERXID Digital Device Issuance Form</h4>
+        <div class="no-print">
+            <button type="button" class="btn btn-outline-primary me-2" onclick="printForm()">
+                <i class="fas fa-print me-2"></i>Print Form
+            </button>
+            <button type="button" class="btn btn-outline-success" onclick="previewPDF()">
+                <i class="fas fa-file-pdf me-2"></i>Preview PDF
+            </button>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <form id="issuance-form">
+            <!-- Section A: Device Information -->
+            <div class="form-section">
+                <h5><i class="fas fa-tablet-alt me-2"></i>Section A: Device Information</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="device_type" class="form-label">Device Type</label>
+                        <input type="text" class="form-control" id="device_type" 
+                               value="{{ device.device_type }}" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="make_model" class="form-label">Make/Model</label>
+                        <input type="text" class="form-control" id="make_model" 
+                               value="{{ device.model or 'VERXID Tablet' }}" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="serial_number" class="form-label">Serial Number</label>
+                        <input type="text" class="form-control" id="serial_number" 
+                               value="{{ device.serial_number }}" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="imei1" class="form-label">IMEI 1</label>
+                        <input type="text" class="form-control" id="imei1" 
+                               value="{{ device.imei1 }}" readonly>
+                    </div>
+                    {% if device.imei2 %}
+                    <div class="col-md-6">
+                        <label for="imei2" class="form-label">IMEI 2</label>
+                        <input type="text" class="form-control" id="imei2" 
+                               value="{{ device.imei2 }}" readonly>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <h6 class="mt-4 mb-3">Accessories Included</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label mb-0">Charger</label>
+                            <div class="accessory-counter">
+                                <button type="button" class="counter-btn" onclick="changeCounter('charger', -1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <div class="counter-display" id="charger-count">1</div>
+                                <button type="button" class="counter-btn" onclick="changeCounter('charger', 1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label mb-0">Power Cable</label>
+                            <div class="accessory-counter">
+                                <button type="button" class="counter-btn" onclick="changeCounter('power_cable', -1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <div class="counter-display" id="power_cable-count">1</div>
+                                <button type="button" class="counter-btn" onclick="changeCounter('power_cable', 1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label mb-0">SIM Card</label>
+                            <div class="accessory-counter">
+                                <button type="button" class="counter-btn" onclick="changeCounter('sim_card', -1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <div class="counter-display" id="sim_card-count">1</div>
+                                <button type="button" class="counter-btn" onclick="changeCounter('sim_card', 1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label mb-0">Protective Case</label>
+                            <div class="accessory-counter">
+                                <button type="button" class="counter-btn" onclick="changeCounter('protective_case', -1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <div class="counter-display" id="protective_case-count">1</div>
+                                <button type="button" class="counter-btn" onclick="changeCounter('protective_case', 1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label mb-0">Stylus Pen</label>
+                            <div class="accessory-counter">
+                                <button type="button" class="counter-btn" onclick="changeCounter('stylus_pen', -1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <div class="counter-display" id="stylus_pen-count">1</div>
+                                <button type="button" class="counter-btn" onclick="changeCounter('stylus_pen', 1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label mb-0">User Manual</label>
+                            <div class="accessory-counter">
+                                <button type="button" class="counter-btn" onclick="changeCounter('user_manual', -1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <div class="counter-display" id="user_manual-count">1</div>
+                                <button type="button" class="counter-btn" onclick="changeCounter('user_manual', 1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <label for="other_accessories" class="form-label">Other Accessories</label>
+                    <input type="text" class="form-control" id="other_accessories" 
+                           placeholder="Specify any other accessories included...">
+                </div>
+                
+                <div class="row g-3 mt-3">
+                    <div class="col-md-6">
+                        <label for="device_condition" class="form-label">Device Condition</label>
+                        <select class="form-select" id="device_condition">
+                            <option value="New" selected>New</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="condition_notes" class="form-label">Condition Notes</label>
+                        <input type="text" class="form-control" id="condition_notes" 
+                               placeholder="Any condition remarks...">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section B: Recipient Information -->
+            <div class="form-section">
+                <h5><i class="fas fa-user me-2"></i>Section B: Recipient Information</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="recipient_name" class="form-label">Full Name *</label>
+                        <input type="text" class="form-control" id="recipient_name" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="recipient_designation" class="form-label">Designation/Title</label>
+                        <input type="text" class="form-control" id="recipient_designation" 
+                               placeholder="e.g., Ward Officer, Registration Officer">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="recipient_staff_id" class="form-label">Staff ID</label>
+                        <input type="text" class="form-control" id="recipient_staff_id">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="registration_center" class="form-label">Registration Center</label>
+                        <input type="text" class="form-control" id="registration_center">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="recipient_phone" class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-control" id="recipient_phone" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="recipient_email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="recipient_email">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="recipient_lga" class="form-label">LGA</label>
+                        <input type="text" class="form-control" id="recipient_lga" 
+                               value="{{ current_user.lga.name if current_user.lga else '' }}" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="recipient_state" class="form-label">State</label>
+                        <input type="text" class="form-control" id="recipient_state" 
+                               value="{{ current_user.state.name if current_user.state else '' }}" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section C: Issuing Authority -->
+            <div class="form-section">
+                <h5><i class="fas fa-building me-2"></i>Section C: Issuing Authority Information</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="issuer_name" class="form-label">Issuer Name</label>
+                        <input type="text" class="form-control" id="issuer_name" 
+                               value="{{ current_user.full_name }}" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="issuer_title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="issuer_title" 
+                               value="ALGON Focal Person" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="issuing_office" class="form-label">Issuing Office</label>
+                        <input type="text" class="form-control" id="issuing_office" 
+                               value="ALGON {{ current_user.lga.name if current_user.lga else '' }} Office" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="issuance_date" class="form-label">Issuance Date</label>
+                        <input type="date" class="form-control" id="issuance_date" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section D: Terms and Conditions -->
+            <div class="form-section">
+                <h5><i class="fas fa-file-contract me-2"></i>Section D: Terms and Conditions</h5>
+                
+                <div class="terms-container">
+                    <ul class="terms-list">
+                        <li>
+                            <strong>1. Device Responsibility:</strong> The recipient accepts full responsibility for the proper care, security, and authorized use of the issued VERXID device and all associated accessories.
+                        </li>
+                        <li>
+                            <strong>2. Authorized Use Only:</strong> This device shall be used exclusively for authorized voter registration and election-related activities as directed by INEC and associated organizations.
+                        </li>
+                        <li>
+                            <strong>3. Security Compliance:</strong> The recipient must implement and maintain appropriate security measures to prevent unauthorized access, theft, or misuse of the device and its data.
+                        </li>
+                        <li>
+                            <strong>4. Data Protection:</strong> All voter data and sensitive information accessed or stored on this device must be handled in accordance with applicable privacy laws and INEC data protection guidelines.
+                        </li>
+                        <li>
+                            <strong>5. Maintenance and Care:</strong> The recipient is responsible for proper maintenance of the device, including regular updates, careful handling, and protection from damage or environmental hazards.
+                        </li>
+                        <li>
+                            <strong>6. Loss or Damage Reporting:</strong> Any loss, theft, damage, or malfunction must be immediately reported to the issuing authority and appropriate security agencies within 24 hours of discovery.
+                        </li>
+                        <li>
+                            <strong>7. Return Obligation:</strong> The device and all accessories must be returned in good working condition upon completion of assignment, transfer, or upon request by the issuing authority.
+                        </li>
+                        <li>
+                            <strong>8. Compliance and Audit:</strong> The recipient agrees to comply with all usage policies and to cooperate fully with any audits or investigations related to the use of this device.
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="terms_accepted" required>
+                        <label class="form-check-label" for="terms_accepted">
+                            <strong>I have read, understood, and agree to abide by all the terms and conditions stated above.</strong>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section E: Digital Signatures -->
+            <div class="form-section">
+                <h5><i class="fas fa-signature me-2"></i>Section E: Digital Signatures</h5>
+                
+                <!-- Recipient Signature -->
+                <div class="signature-section" id="recipient-signature-section">
+                    <h6 class="mb-3">Recipient Signature</h6>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="recipient-signature-pad" class="signature-pad" width="600" height="150"></canvas>
+                            <div class="signature-controls">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                        onclick="clearSignature('recipient')">
+                                    <i class="fas fa-eraser me-1"></i>Clear
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-2">
+                                <label for="recipient_printed_name" class="form-label">Printed Name</label>
+                                <input type="text" class="form-control" id="recipient_printed_name">
+                            </div>
+                            <div class="mb-2">
+                                <label for="recipient_signature_date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="recipient_signature_date">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Issuer Signature -->
+                <div class="signature-section" id="issuer-signature-section">
+                    <h6 class="mb-3">Issuer Signature (ALGON Focal)</h6>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="issuer-signature-pad" class="signature-pad" width="600" height="150"></canvas>
+                            <div class="signature-controls">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                        onclick="clearSignature('issuer')">
+                                    <i class="fas fa-eraser me-1"></i>Clear
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" 
+                                        onclick="loadSavedSignature('issuer')">
+                                    <i class="fas fa-download me-1"></i>Use Saved Signature
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-2">
+                                <label for="issuer_printed_name" class="form-label">Printed Name</label>
+                                <input type="text" class="form-control" id="issuer_printed_name" 
+                                       value="{{ current_user.full_name }}" readonly>
+                            </div>
+                            <div class="mb-2">
+                                <label for="issuer_signature_date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="issuer_signature_date">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Witness Signature -->
+                <div class="signature-section" id="witness-signature-section">
+                    <h6 class="mb-3">Witness Signature (DCR)</h6>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="witness-signature-pad" class="signature-pad" width="600" height="150"></canvas>
+                            <div class="signature-controls">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                        onclick="clearSignature('witness')">
+                                    <i class="fas fa-eraser me-1"></i>Clear
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-2">
+                                <label for="witness_printed_name" class="form-label">Printed Name</label>
+                                <input type="text" class="form-control" id="witness_printed_name">
+                            </div>
+                            <div class="mb-2">
+                                <label for="witness_signature_date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="witness_signature_date">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4 no-print">
+                <div>
+                    <button type="button" class="btn btn-outline-secondary me-2" onclick="saveDraft()">
+                        <i class="fas fa-save me-2"></i>Save Draft
+                    </button>
+                    <button type="button" class="btn btn-outline-info" onclick="previewForm()">
+                        <i class="fas fa-eye me-2"></i>Preview
+                    </button>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-success btn-lg" id="submit-form">
+                        <i class="fas fa-check me-2"></i>Complete Issuance
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let signaturePads = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Set current date for all date fields
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('issuance_date').value = today;
+    document.getElementById('recipient_signature_date').value = today;
+    document.getElementById('issuer_signature_date').value = today;
+    document.getElementById('witness_signature_date').value = today;
+    
+    // Initialize signature pads
+    initializeSignaturePads();
+    
+    // Set up form validation
+    setupFormValidation();
+    
+    // Auto-populate recipient name from recipient_name if available
+    const recipientNameField = document.getElementById('recipient_name');
+    const recipientPrintedNameField = document.getElementById('recipient_printed_name');
+    
+    recipientNameField.addEventListener('input', function() {
+        recipientPrintedNameField.value = this.value;
+    });
+    
+    // Form submission
+    document.getElementById('issuance-form').addEventListener('submit', handleFormSubmit);
+});
+
+function initializeSignaturePads() {
+    const signatures = ['recipient', 'issuer', 'witness'];
+    
+    signatures.forEach(type => {
+        const canvas = document.getElementById(`${type}-signature-pad`);
+        const ctx = canvas.getContext('2d');
+        
+        signaturePads[type] = {
+            canvas: canvas,
+            ctx: ctx,
+            drawing: false,
+            isEmpty: true,
+            
+            startDrawing: function(e) {
+                this.drawing = true;
+                this.isEmpty = false;
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                
+                // Highlight active section
+                document.getElementById(`${type}-signature-section`).classList.add('active');
+            },
+            
+            draw: function(e) {
+                if (!this.drawing) return;
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                
+                this.ctx.lineTo(x, y);
+                this.ctx.stroke();
+            },
+            
+            stopDrawing: function() {
+                this.drawing = false;
+                document.getElementById(`${type}-signature-section`).classList.remove('active');
+            },
+            
+            clear: function() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.isEmpty = true;
+            },
+            
+            getDataURL: function() {
+                return this.canvas.toDataURL();
+            },
+            
+            loadSignature: function(dataURL) {
+                const img = new Image();
+                img.onload = () => {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.ctx.drawImage(img, 0, 0);
+                    this.isEmpty = false;
+                };
+                img.src = dataURL;
+            }
+        };
+        
+        // Set up canvas styling
+        signaturePads[type].ctx.strokeStyle = '#000';
+        signaturePads[type].ctx.lineWidth = 2;
+        signaturePads[type].ctx.lineCap = 'round';
+        signaturePads[type].ctx.lineJoin = 'round';
+        
+        // Mouse events
+        canvas.addEventListener('mousedown', (e) => signaturePads[type].startDrawing(e));
+        canvas.addEventListener('mousemove', (e) => signaturePads[type].draw(e));
+        canvas.addEventListener('mouseup', () => signaturePads[type].stopDrawing());
+        canvas.addEventListener('mouseout', () => signaturePads[type].stopDrawing());
+        
+        // Touch events
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            signaturePads[type].startDrawing(e);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            signaturePads[type].draw(e);
+        });
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            signaturePads[type].stopDrawing();
+        });
+    });
+}
+
+function changeCounter(accessory, change) {
+    const countElement = document.getElementById(`${accessory}-count`);
+    let currentValue = parseInt(countElement.textContent);
+    let newValue = Math.max(0, currentValue + change);
+    countElement.textContent = newValue;
+}
+
+function clearSignature(type) {
+    signaturePads[type].clear();
+}
+
+function loadSavedSignature(type) {
+    const savedSignature = '{{ current_user.signature_data if current_user.signature_data else "" }}';
+    if (savedSignature) {
+        signaturePads[type].loadSignature(savedSignature);
+    } else {
+        alert('No saved signature found.');
+    }
+}
+
+function setupFormValidation() {
+    const requiredFields = ['recipient_name', 'recipient_phone'];
+    const termsCheckbox = document.getElementById('terms_accepted');
+    const submitBtn = document.getElementById('submit-form');
+    
+    function validateForm() {
+        const allFieldsFilled = requiredFields.every(field => 
+            document.getElementById(field).value.trim() !== ''
+        );
+        
+        const termsAccepted = termsCheckbox.checked;
+        
+        const hasRecipientSignature = !signaturePads.recipient.isEmpty;
+        const hasIssuerSignature = !signaturePads.issuer.isEmpty;
+        
+        submitBtn.disabled = !(allFieldsFilled && termsAccepted && hasRecipientSignature && hasIssuerSignature);
+    }
+    
+    // Add event listeners
+    requiredFields.forEach(field => {
+        document.getElementById(field).addEventListener('input', validateForm);
+    });
+    
+    termsCheckbox.addEventListener('change', validateForm);
+    
+    // Check signatures periodically (simple approach)
+    setInterval(validateForm, 1000);
+}
+
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submit-form');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    
+    try {
+        const formData = {
+            device_id: {{ device.id }},
+            
+            // Section A: Device Information
+            device_type: document.getElementById('device_type').value,
+            make_model: document.getElementById('make_model').value,
+            serial_number: document.getElementById('serial_number').value,
+            
+            // Accessories
+            charger_qty: parseInt(document.getElementById('charger-count').textContent),
+            power_cable_qty: parseInt(document.getElementById('power_cable-count').textContent),
+            sim_card_qty: parseInt(document.getElementById('sim_card-count').textContent),
+            protective_case_qty: parseInt(document.getElementById('protective_case-count').textContent),
+            stylus_pen_qty: parseInt(document.getElementById('stylus_pen-count').textContent),
+            user_manual_qty: parseInt(document.getElementById('user_manual-count').textContent),
+            other_accessories: document.getElementById('other_accessories').value,
+            
+            device_condition: document.getElementById('device_condition').value,
+            condition_notes: document.getElementById('condition_notes').value,
+            
+            // Section B: Recipient Information
+            recipient_name: document.getElementById('recipient_name').value,
+            recipient_designation: document.getElementById('recipient_designation').value,
+            recipient_staff_id: document.getElementById('recipient_staff_id').value,
+            registration_center: document.getElementById('registration_center').value,
+            recipient_phone: document.getElementById('recipient_phone').value,
+            recipient_email: document.getElementById('recipient_email').value,
+            recipient_lga: document.getElementById('recipient_lga').value,
+            recipient_state: document.getElementById('recipient_state').value,
+            
+            // Section C: Issuing Authority
+            issuer_name: document.getElementById('issuer_name').value,
+            issuer_title: document.getElementById('issuer_title').value,
+            issuing_office: document.getElementById('issuing_office').value,
+            issuance_date: document.getElementById('issuance_date').value,
+            
+            // Section D: Terms
+            terms_accepted: document.getElementById('terms_accepted').checked,
+            
+            // Section E: Signatures
+            recipient_signature: signaturePads.recipient.getDataURL(),
+            recipient_printed_name: document.getElementById('recipient_printed_name').value,
+            recipient_signature_date: document.getElementById('recipient_signature_date').value,
+            
+            issuer_signature: signaturePads.issuer.getDataURL(),
+            issuer_printed_name: document.getElementById('issuer_printed_name').value,
+            issuer_signature_date: document.getElementById('issuer_signature_date').value,
+            
+            witness_signature: signaturePads.witness.isEmpty ? null : signaturePads.witness.getDataURL(),
+            witness_printed_name: document.getElementById('witness_printed_name').value,
+            witness_signature_date: document.getElementById('witness_signature_date').value
+        };
+        
+        const response = await fetch('/focal/submit_issuance_form', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Device issuance completed successfully! Form saved and device marked as distributed.');
+            window.location.href = "{{ url_for('algon_dashboard') }}";
+        } else {
+            alert('Error completing issuance: ' + result.error);
+        }
+        
+    } catch (error) {
+        console.error('Issuance error:', error);
+        alert('An error occurred while processing the issuance. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+}
+
+function saveDraft() {
+    localStorage.setItem('verxid_issuance_draft', JSON.stringify({
+        recipient_name: document.getElementById('recipient_name').value,
+        recipient_designation: document.getElementById('recipient_designation').value,
+        recipient_phone: document.getElementById('recipient_phone').value,
+        recipient_email: document.getElementById('recipient_email').value,
+        // Add other fields as needed
+    }));
+    
+    alert('Draft saved successfully!');
+}
+
+function printForm() {
+    window.print();
+}
+
+function previewForm() {
+    // Create a preview window
+    const printWindow = window.open('', '_blank');
+    const formHtml = document.querySelector('.card').outerHTML;
+    
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>VERXID Issuance Form Preview</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body { margin: 20px; }
+                .signature-pad { border: 1px solid #000; }
+                .no-print { display: none; }
+            </style>
+        </head>
+        <body>
+            ${formHtml}
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+}
+
+async function previewPDF() {
+    // This would integrate with the PDF generation endpoint
+    alert('PDF preview functionality will be implemented with the PDF generation system.');
+}
+</script>
+{% endblock %}

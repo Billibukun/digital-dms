@@ -1,0 +1,462 @@
+{% extends "base.html" %}
+
+{% block title %}Data Management Hub - VERXID System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+    <!-- Header Section -->
+    <div class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <!-- Title and Navigation -->
+                <div class="flex-1">
+                    <div class="flex items-center mb-4">
+                        <a href="{{ url_for('dashboard') }}" class="text-gray-600 hover:text-gray-900 mr-6">
+                            <i class="fas fa-arrow-left text-xl"></i>
+                        </a>
+                        <div class="bg-gradient-to-r from-purple-500 to-indigo-600 p-3 rounded-xl shadow-lg">
+                            <i class="fas fa-database text-white text-xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h1 class="text-3xl font-bold text-gray-900">Data Management Hub</h1>
+                            <p class="text-gray-600 mt-1">Comprehensive control center for all system data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="{{ url_for('csv_upload') }}" 
+                       class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-upload mr-2"></i>Bulk Upload
+                    </a>
+                    <button onclick="refreshAllStats()" 
+                            class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh Stats
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        <!-- Data Overview Stats -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-chart-bar mr-2 text-gray-600"></i>
+                    System Data Overview
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <!-- States Stats -->
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-blue-600 text-sm font-medium uppercase tracking-wide">States</p>
+                                <p class="text-2xl font-bold text-blue-900" id="states-count">{{ stats.states or 0 }}</p>
+                                <p class="text-blue-700 text-xs mt-1">Federal entities</p>
+                            </div>
+                            <div class="bg-blue-200 p-3 rounded-lg">
+                                <i class="fas fa-map text-blue-700 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LGAs Stats -->
+                    <div class="bg-gradient-to-br from-emerald-50 to-emerald-100 p-6 rounded-xl border border-emerald-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-emerald-600 text-sm font-medium uppercase tracking-wide">LGAs</p>
+                                <p class="text-2xl font-bold text-emerald-900" id="lgas-count">{{ stats.lgas or 0 }}</p>
+                                <p class="text-emerald-700 text-xs mt-1">Local governments</p>
+                            </div>
+                            <div class="bg-emerald-200 p-3 rounded-lg">
+                                <i class="fas fa-building text-emerald-700 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wards Stats -->
+                    <div class="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl border border-amber-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-amber-600 text-sm font-medium uppercase tracking-wide">Wards</p>
+                                <p class="text-2xl font-bold text-amber-900" id="wards-count">{{ stats.wards or 0 }}</p>
+                                <p class="text-amber-700 text-xs mt-1">Electoral wards</p>
+                            </div>
+                            <div class="bg-amber-200 p-3 rounded-lg">
+                                <i class="fas fa-map-marker-alt text-amber-700 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Focal Persons Stats -->
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-purple-600 text-sm font-medium uppercase tracking-wide">Focal Persons</p>
+                                <p class="text-2xl font-bold text-purple-900" id="focals-count">{{ stats.focal_persons or 0 }}</p>
+                                <p class="text-purple-700 text-xs mt-1">Field officers</p>
+                            </div>
+                            <div class="bg-purple-200 p-3 rounded-lg">
+                                <i class="fas fa-user-tie text-purple-700 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Devices Stats -->
+                    <div class="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-red-600 text-sm font-medium uppercase tracking-wide">Devices</p>
+                                <p class="text-2xl font-bold text-red-900" id="devices-count">{{ stats.devices or 0 }}</p>
+                                <p class="text-red-700 text-xs mt-1">VERXID tablets</p>
+                            </div>
+                            <div class="bg-red-200 p-3 rounded-lg">
+                                <i class="fas fa-tablet-alt text-red-700 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Geographic Data Management -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-globe-americas mr-2 text-blue-600"></i>
+                        Geographic Data
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">Manage states, LGAs, and wards hierarchy</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <!-- States Management -->
+                    <a href="{{ url_for('manage_states') }}" class="block bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl p-4 border border-blue-200 transition-all duration-200 group">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="bg-blue-200 group-hover:bg-blue-300 p-3 rounded-lg transition-colors">
+                                    <i class="fas fa-map text-blue-700 text-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-blue-900">States Management</h4>
+                                    <p class="text-blue-700 text-sm">Manage federal states</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-blue-200 text-blue-800 text-xs font-bold px-2 py-1 rounded-full" id="states-badge">{{ stats.states or 0 }}</span>
+                                <i class="fas fa-chevron-right text-blue-600 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- LGAs Management -->
+                    <a href="{{ url_for('manage_lgas') }}" class="block bg-gradient-to-r from-emerald-50 to-emerald-100 hover:from-emerald-100 hover:to-emerald-200 rounded-xl p-4 border border-emerald-200 transition-all duration-200 group">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="bg-emerald-200 group-hover:bg-emerald-300 p-3 rounded-lg transition-colors">
+                                    <i class="fas fa-building text-emerald-700 text-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-emerald-900">LGAs Management</h4>
+                                    <p class="text-emerald-700 text-sm">Local government areas</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-emerald-200 text-emerald-800 text-xs font-bold px-2 py-1 rounded-full" id="lgas-badge">{{ stats.lgas or 0 }}</span>
+                                <i class="fas fa-chevron-right text-emerald-600 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Wards Management -->
+                    <a href="{{ url_for('manage_wards') }}" class="block bg-gradient-to-r from-amber-50 to-amber-100 hover:from-amber-100 hover:to-amber-200 rounded-xl p-4 border border-amber-200 transition-all duration-200 group">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="bg-amber-200 group-hover:bg-amber-300 p-3 rounded-lg transition-colors">
+                                    <i class="fas fa-map-marker-alt text-amber-700 text-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-amber-900">Wards Management</h4>
+                                    <p class="text-amber-700 text-sm">Electoral wards</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-amber-200 text-amber-800 text-xs font-bold px-2 py-1 rounded-full" id="wards-badge">{{ stats.wards or 0 }}</span>
+                                <i class="fas fa-chevron-right text-amber-600 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Personnel & System Data -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-users-cog mr-2 text-purple-600"></i>
+                        Personnel & Systems
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">Manage people and devices</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <!-- Focal Persons Management -->
+                    <a href="{{ url_for('manage_focal_persons') }}" class="block bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl p-4 border border-purple-200 transition-all duration-200 group">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="bg-purple-200 group-hover:bg-purple-300 p-3 rounded-lg transition-colors">
+                                    <i class="fas fa-user-tie text-purple-700 text-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-purple-900">Focal Persons</h4>
+                                    <p class="text-purple-700 text-sm">Field officers & coordinators</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-purple-200 text-purple-800 text-xs font-bold px-2 py-1 rounded-full" id="focals-badge">{{ stats.focal_persons or 0 }}</span>
+                                <i class="fas fa-chevron-right text-purple-600 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Users Management -->
+                    <a href="{{ url_for('manage_users') }}" class="block bg-gradient-to-r from-teal-50 to-teal-100 hover:from-teal-100 hover:to-teal-200 rounded-xl p-4 border border-teal-200 transition-all duration-200 group">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="bg-teal-200 group-hover:bg-teal-300 p-3 rounded-lg transition-colors">
+                                    <i class="fas fa-users text-teal-700 text-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-teal-900">System Users</h4>
+                                    <p class="text-teal-700 text-sm">All system users</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-teal-200 text-teal-800 text-xs font-bold px-2 py-1 rounded-full" id="users-badge">{{ stats.users or 0 }}</span>
+                                <i class="fas fa-chevron-right text-teal-600 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Devices Management -->
+                    <a href="{{ url_for('manage_devices') }}" class="block bg-gradient-to-r from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 rounded-xl p-4 border border-red-200 transition-all duration-200 group">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="bg-red-200 group-hover:bg-red-300 p-3 rounded-lg transition-colors">
+                                    <i class="fas fa-tablet-alt text-red-700 text-lg"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-red-900">Device Inventory</h4>
+                                    <p class="text-red-700 text-sm">VERXID tablets</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-red-200 text-red-800 text-xs font-bold px-2 py-1 rounded-full" id="devices-badge">{{ stats.devices or 0 }}</span>
+                                <i class="fas fa-chevron-right text-red-600 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Tools Section -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-tools mr-2 text-gray-600"></i>
+                    Data Management Tools
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- CSV Upload Tool -->
+                    <a href="{{ url_for('csv_upload') }}" class="bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 rounded-xl p-6 border border-green-200 transition-all duration-200 group">
+                        <div class="text-center">
+                            <div class="bg-green-200 group-hover:bg-green-300 p-4 rounded-full w-16 h-16 mx-auto mb-4 transition-colors">
+                                <i class="fas fa-upload text-green-700 text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-green-900 mb-2">Bulk Upload</h4>
+                            <p class="text-green-700 text-sm">Upload CSV files for bulk data import</p>
+                        </div>
+                    </a>
+
+                    <!-- Data Export Tool -->
+                    <button onclick="exportAllData()" class="bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-xl p-6 border border-blue-200 transition-all duration-200 group">
+                        <div class="text-center">
+                            <div class="bg-blue-200 group-hover:bg-blue-300 p-4 rounded-full w-16 h-16 mx-auto mb-4 transition-colors">
+                                <i class="fas fa-download text-blue-700 text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-blue-900 mb-2">Export Data</h4>
+                            <p class="text-blue-700 text-sm">Download system data as CSV files</p>
+                        </div>
+                    </button>
+
+                    <!-- Data Cleanup Tool -->
+                    <button onclick="showCleanupModal()" class="bg-gradient-to-br from-red-50 to-pink-50 hover:from-red-100 hover:to-pink-100 rounded-xl p-6 border border-red-200 transition-all duration-200 group">
+                        <div class="text-center">
+                            <div class="bg-red-200 group-hover:bg-red-300 p-4 rounded-full w-16 h-16 mx-auto mb-4 transition-colors">
+                                <i class="fas fa-broom text-red-700 text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-red-900 mb-2">Data Cleanup</h4>
+                            <p class="text-red-700 text-sm">Clean up and reset system data</p>
+                        </div>
+                    </button>
+
+                    <!-- Logo Management Tool -->
+                    <a href="{{ url_for('manage_logos') }}" class="bg-gradient-to-br from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 rounded-xl p-6 border border-indigo-200 transition-all duration-200 group">
+                        <div class="text-center">
+                            <div class="bg-indigo-200 group-hover:bg-indigo-300 p-4 rounded-full w-16 h-16 mx-auto mb-4 transition-colors">
+                                <i class="fas fa-image text-indigo-700 text-2xl"></i>
+                            </div>
+                            <h4 class="font-semibold text-indigo-900 mb-2">Logo Management</h4>
+                            <p class="text-indigo-700 text-sm">Upload logos for PDF documents</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Cleanup Modal -->
+<div id="cleanup-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div class="p-6">
+            <div class="flex items-center mb-4">
+                <div class="bg-red-100 p-3 rounded-full mr-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Data Cleanup Options</h3>
+            </div>
+            <p class="text-gray-600 mb-6">Select what data you want to clear:</p>
+            
+            <div class="space-y-3 mb-6">
+                <button onclick="clearDataType('states')" class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-red-50 hover:border-red-300 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700">Clear All States</span>
+                        <span class="text-red-600 text-sm" id="states-count-modal">{{ stats.states or 0 }} records</span>
+                    </div>
+                </button>
+                <button onclick="clearDataType('lgas')" class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-red-50 hover:border-red-300 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700">Clear All LGAs</span>
+                        <span class="text-red-600 text-sm" id="lgas-count-modal">{{ stats.lgas or 0 }} records</span>
+                    </div>
+                </button>
+                <button onclick="clearDataType('wards')" class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-red-50 hover:border-red-300 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700">Clear All Wards</span>
+                        <span class="text-red-600 text-sm" id="wards-count-modal">{{ stats.wards or 0 }} records</span>
+                    </div>
+                </button>
+                <button onclick="clearDataType('focal_persons')" class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-red-50 hover:border-red-300 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700">Clear All Focal Persons</span>
+                        <span class="text-red-600 text-sm" id="focals-count-modal">{{ stats.focal_persons or 0 }} records</span>
+                    </div>
+                </button>
+                <button onclick="clearDataType('devices')" class="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-red-50 hover:border-red-300 transition-colors">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700">Clear All Devices</span>
+                        <span class="text-red-600 text-sm" id="devices-count-modal">{{ stats.devices or 0 }} records</span>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="hideCleanupModal()" class="flex-1 px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Enhanced Functionality -->
+<script>
+function refreshAllStats() {
+    location.reload();
+}
+
+function showCleanupModal() {
+    document.getElementById('cleanup-modal').classList.remove('hidden');
+}
+
+function hideCleanupModal() {
+    document.getElementById('cleanup-modal').classList.add('hidden');
+}
+
+function clearDataType(dataType) {
+    const dataNames = {
+        'states': 'States',
+        'lgas': 'LGAs', 
+        'wards': 'Wards',
+        'focal_persons': 'Focal Persons',
+        'devices': 'Devices'
+    };
+    
+    if (confirm(`⚠️ WARNING: This will permanently delete ALL ${dataNames[dataType]} data from the system.\n\nThis action cannot be undone. Are you absolutely sure?`)) {
+        fetch(`/admin/clear_data/${dataType}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('success', data.message);
+                hideCleanupModal();
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showNotification('error', data.error || `Failed to clear ${dataNames[dataType]} data`);
+            }
+        })
+        .catch(error => {
+            showNotification('error', 'Network error occurred while clearing data');
+        });
+    }
+}
+
+function exportAllData() {
+    showNotification('info', 'Data export feature will be implemented soon');
+}
+
+function showNotification(type, message) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-md transform transition-all duration-300 ${
+        type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 
+        type === 'info' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+        'bg-red-100 text-red-800 border border-red-200'
+    }`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'info' ? 'info-circle' : 'exclamation-triangle'} mr-3"></i>
+            <span class="font-medium">${message}</span>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => document.body.removeChild(notification), 300);
+    }, 5000);
+}
+
+// Auto-hide flash messages
+document.addEventListener('DOMContentLoaded', function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 300);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

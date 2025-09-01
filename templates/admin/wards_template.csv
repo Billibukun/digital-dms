@@ -1,0 +1,3 @@
+name,code,lga_code,state_code,ward_officer_name,ward_officer_phone,ward_officer_email,ward_officer_staff_id,ward_officer_designation,ward_officer_nin,ward_officer_bank_name,ward_officer_account_number,registration_center_name,registration_center_address
+Garki Ward I,FCT-ABUJA-01,ABJ-ABUJA,FCT,Dr. Mary Johnson,08012345678,mary.johnson@health.gov,HW001,Health Worker,12345678901,First Bank,1234567890,Garki Primary Health Centre,Plot 123 Garki Area 1 Abuja FCT
+Wuse District,FCT-ABUJA-02,ABJ-ABUJA,FCT,Nurse Peter Okafor,08087654321,peter.okafor@health.gov,HW002,Senior Nurse,10987654321,GTBank,0987654321,Wuse General Hospital,Central Business District Wuse Abuja FCT

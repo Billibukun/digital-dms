@@ -1,0 +1,3 @@
+name,phone,email,lga_code,state_code,role_type,nin,bank_name,account_number,organization
+John Doe,08012345678,john.doe@email.com,ABJ-ABUJA,FCT,ALGON,12345678901,First Bank,1234567890,ALGON
+Jane Smith,08087654321,jane.smith@email.com,ABJ-ABUJA,FCT,DCR,10987654321,GTBank,0987654321,NPC

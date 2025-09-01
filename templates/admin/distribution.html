@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}Device Distribution - Device Documentation Management System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center">
+                <a href="{{ url_for('dashboard') }}" 
+                   class="bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 mr-4">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-share-alt text-accent mr-3"></i>
+                        Device Distribution
+                    </h1>
+                    <p class="text-gray-600 mt-1">Distribute devices to ward-level recipients</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Distribution Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-clipboard-list text-accent mr-2"></i>
+                            Create Distribution Record
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <form method="POST" class="space-y-6">
+                            <!-- Device Selection -->
+                            <div>
+                                <label for="device_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Select Device to Distribute *
+                                </label>
+                                <select id="device_id" name="device_id" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                                    <option value="">Choose a claimed device</option>
+                                    {% for device in devices %}
+                                    <option value="{{ device.id }}" data-serial="{{ device.serial_number }}" data-imei="{{ device.imei1 }}">
+                                        {{ device.serial_number }} - {{ device.imei1 }}
+                                        {% if device.assigned_focal %}({{ device.assigned_focal.full_name }}){% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Recipient Information -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="recipient_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Recipient Name *
+                                    </label>
+                                    <input type="text" id="recipient_name" name="recipient_name" required
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                                           placeholder="Full name of recipient">
+                                </div>
+                                <div>
+                                    <label for="recipient_designation" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Designation/Role
+                                    </label>
+                                    <input type="text" id="recipient_designation" name="recipient_designation"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                                           placeholder="e.g. Ward Officer, Registration Officer">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="recipient_phone" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Recipient Phone Number
+                                </label>
+                                <input type="tel" id="recipient_phone" name="recipient_phone"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                                       placeholder="08012345678">
+                            </div>
+
+                            <!-- Location Selection -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="state_select" class="block text-sm font-medium text-gray-700 mb-2">
+                                        State
+                                    </label>
+                                    <select id="state_select" 
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                                        <option value="">Select State</option>
+                                        {% for state in states %}
+                                        <option value="{{ state.id }}">{{ state.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="lga_select" class="block text-sm font-medium text-gray-700 mb-2">
+                                        LGA
+                                    </label>
+                                    <select id="lga_select"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                                            disabled>
+                                        <option value="">Select LGA</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="ward_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Ward *
+                                    </label>
+                                    <select id="ward_id" name="ward_id" required
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                                            disabled>
+                                        <option value="">Select Ward</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Witness Selection -->
+                            <div>
+                                <label for="witness_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Witness (Optional)
+                                </label>
+                                <select id="witness_id" name="witness_id"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                                    <option value="">Select Witness</option>
+                                    <!-- Will be populated based on selected ward -->
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">DCR focal person or other authorized witness</p>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                                <a href="{{ url_for('dashboard') }}" 
+                                   class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                                    Cancel
+                                </a>
+                                <button type="submit" 
+                                        class="bg-accent text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center">
+                                    <i class="fas fa-share-alt mr-2"></i>
+                                    Create Distribution Record
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Information Sidebar -->
+            <div class="space-y-6">
+                <!-- Distribution Summary -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-info-circle text-accent mr-2"></i>
+                            Distribution Info
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Available Devices</span>
+                                <span class="font-semibold text-accent">{{ devices|length }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Your Role</span>
+                                <span class="font-semibold text-gray-900">{{ current_user.role.replace('_', ' ').title() }}</span>
+                            </div>
+                            {% if current_user.state %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Your State</span>
+                                <span class="font-semibold text-gray-900">{{ current_user.state.name }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Distribution Guidelines -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-clipboard-check text-accent mr-2"></i>
+                            Guidelines
+                        </h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3 text-sm text-gray-600">
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-success mr-2 mt-0.5 flex-shrink-0"></i>
+                                <span>Only claimed devices can be distributed</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-success mr-2 mt-0.5 flex-shrink-0"></i>
+                                <span>Recipient information must be accurate</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-success mr-2 mt-0.5 flex-shrink-0"></i>
+                                <span>Ward selection is mandatory</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-success mr-2 mt-0.5 flex-shrink-0"></i>
+                                <span>Witness signature recommended</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-success mr-2 mt-0.5 flex-shrink-0"></i>
+                                <span>Distribution form will be generated</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stateSelect = document.getElementById('state_select');
+    const lgaSelect = document.getElementById('lga_select');
+    const wardSelect = document.getElementById('ward_id');
+    const witnessSelect = document.getElementById('witness_id');
+    
+    // Load LGAs when state changes
+    stateSelect.addEventListener('change', async function() {
+        const stateId = this.value;
+        
+        // Reset dependent selects
+        lgaSelect.innerHTML = '<option value="">Select LGA</option>';
+        wardSelect.innerHTML = '<option value="">Select Ward</option>';
+        witnessSelect.innerHTML = '<option value="">Select Witness</option>';
+        
+        lgaSelect.disabled = !stateId;
+        wardSelect.disabled = true;
+        
+        if (!stateId) return;
+        
+        try {
+            const response = await fetch(`/api/lgas/${stateId}`);
+            const lgas = await response.json();
+            
+            lgas.forEach(lga => {
+                const option = document.createElement('option');
+                option.value = lga.id;
+                option.textContent = lga.name;
+                lgaSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading LGAs:', error);
+        }
+    });
+    
+    // Load wards when LGA changes
+    lgaSelect.addEventListener('change', async function() {
+        const lgaId = this.value;
+        
+        wardSelect.innerHTML = '<option value="">Select Ward</option>';
+        witnessSelect.innerHTML = '<option value="">Select Witness</option>';
+        wardSelect.disabled = !lgaId;
+        
+        if (!lgaId) return;
+        
+        try {
+            const response = await fetch(`/api/wards/${lgaId}`);
+            const wards = await response.json();
+            
+            wards.forEach(ward => {
+                const option = document.createElement('option');
+                option.value = ward.id;
+                option.textContent = ward.name;
+                wardSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading wards:', error);
+        }
+    });
+    
+    // Load witnesses when ward changes
+    wardSelect.addEventListener('change', async function() {
+        const wardId = this.value;
+        
+        witnessSelect.innerHTML = '<option value="">Select Witness</option>';
+        
+        if (!wardId) return;
+        
+        // Load users with DCR focal role for the selected ward
+        try {
+            const response = await fetch(`/api/witnesses/${wardId}`);
+            const witnesses = await response.json();
+            
+            witnesses.forEach(witness => {
+                const option = document.createElement('option');
+                option.value = witness.id;
+                option.textContent = `${witness.full_name} (${witness.role})`;
+                witnessSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading witnesses:', error);
+        }
+    });
+    
+    // Auto-populate location based on selected device
+    document.getElementById('device_id').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value && selectedOption.dataset) {
+            // Could auto-populate state/LGA based on device assignment
+        }
+    });
+});
+</script>
+{% endblock %}

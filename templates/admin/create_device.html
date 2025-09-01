@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Create Device - VERXID System{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header Section -->
+    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-nigeria-green">
+        <div class="flex items-center">
+            <a href="{{ url_for('manage_devices') }}" 
+               class="bg-gray-100 text-gray-700 p-3 rounded-lg hover:bg-gray-200 transition-colors duration-200 mr-4">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-tablet-alt text-nigeria-green mr-4"></i>
+                    Create New Device
+                </h1>
+                <p class="text-gray-600 mt-2">Add a new device to the VERXID system</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Form -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <form method="POST" class="space-y-6" id="deviceForm">
+                    <!-- Basic Device Information -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-microchip text-nigeria-green mr-3"></i>
+                            Device Information
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="serial_number" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Serial Number *
+                                </label>
+                                <input type="text" 
+                                       id="serial_number" 
+                                       name="serial_number" 
+                                       required
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                                       placeholder="e.g. RT7TITAN0012345">
+                                <div id="serial_number_error" class="text-red-500 text-sm mt-1 hidden"></div>
+                            </div>
+                            <div>
+                                <label for="device_type" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Device Type
+                                </label>
+                                <select id="device_type" 
+                                        name="device_type"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                                    <option value="tablet">Tablet</option>
+                                    <option value="smartphone">Smartphone</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label for="model" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Model
+                                </label>
+                                <input type="text" 
+                                       id="model" 
+                                       name="model"
+                                       value="VERXID Tablet"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                            </div>
+                            <div>
+                                <label for="manufacturer" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Manufacturer
+                                </label>
+                                <input type="text" 
+                                       id="manufacturer" 
+                                       name="manufacturer"
+                                       value="VERXID"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IMEI Information -->
+                    <div class="border-b border-gray-200 pb-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-barcode text-nigeria-green mr-3"></i>
+                            IMEI Information
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="imei1" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    IMEI 1 * <span class="text-xs text-gray-500">(15 digits)</span>
+                                </label>
+                                <input type="text" 
+                                       id="imei1" 
+                                       name="imei1" 
+                                       required
+                                       maxlength="15"
+                                       pattern="[0-9]{15}"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white font-mono"
+                                       placeholder="123456789012345">
+                                <div id="imei1_error" class="text-red-500 text-sm mt-1 hidden"></div>
+                            </div>
+                            <div>
+                                <label for="imei2" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    IMEI 2 <span class="text-xs text-gray-500">(15 digits, optional)</span>
+                                </label>
+                                <input type="text" 
+                                       id="imei2" 
+                                       name="imei2"
+                                       maxlength="15"
+                                       pattern="[0-9]{15}"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white font-mono"
+                                       placeholder="123456789012345">
+                                <div id="imei2_error" class="text-red-500 text-sm mt-1 hidden"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label for="barcode" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Barcode
+                                </label>
+                                <input type="text" 
+                                       id="barcode" 
+                                       name="barcode"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                            </div>
+                            <div>
+                                <label for="carton_number" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Carton Number
+                                </label>
+                                <input type="text" 
+                                       id="carton_number" 
+                                       name="carton_number"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status & Assignment -->
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                            <i class="fas fa-cogs text-nigeria-green mr-3"></i>
+                            Status & Assignment
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="status" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Status
+                                </label>
+                                <select id="status" 
+                                        name="status"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                                    <option value="unclaimed">Unclaimed</option>
+                                    <option value="claimed">Claimed</option>
+                                    <option value="distributed">Distributed</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="condition" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Condition
+                                </label>
+                                <select id="condition" 
+                                        name="condition"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                                    <option value="new">New</option>
+                                    <option value="good" selected>Good</option>
+                                    <option value="fair">Fair</option>
+                                    <option value="poor">Poor</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="state_id" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    State
+                                </label>
+                                <select id="state_id" 
+                                        name="state_id"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-nigeria-green focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                                    <option value="">Select State</option>
+                                    {% for state in states %}
+                                    <option value="{{ state.id }}">{{ state.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                        <a href="{{ url_for('manage_devices') }}" 
+                           class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200">
+                            Cancel
+                        </a>
+                        <button type="submit" 
+                                class="bg-gradient-to-r from-nigeria-green to-accent text-white px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center">
+                            <i class="fas fa-tablet-alt mr-2"></i>Create Device
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Validation Info Sidebar -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                    <i class="fas fa-shield-check text-nigeria-green mr-3"></i>
+                    Validation Rules
+                </h2>
+                <div class="space-y-4">
+                    <div class="p-4 bg-gradient-to-r from-nigeria-green/10 to-nigeria-green/20 rounded-lg border border-nigeria-green/20">
+                        <h3 class="font-semibold text-gray-900">Serial Number</h3>
+                        <ul class="text-sm text-gray-600 mt-1 list-disc list-inside">
+                            <li>Exactly 15 characters required</li>
+                            <li>Must be unique in system</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                        <h3 class="font-semibold text-gray-900">IMEI Numbers</h3>
+                        <ul class="text-sm text-gray-600 mt-1 list-disc list-inside">
+                            <li>Exactly 15 digits</li>
+                            <li>IMEI1 is required</li>
+                            <li>IMEI2 is optional</li>
+                            <li>Must be unique</li>
+                            <li>Cannot be identical</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-gradient-to-r from-nigeria-yellow/20 to-nigeria-yellow/40 rounded-lg border border-nigeria-yellow/30">
+                        <h3 class="font-semibold text-gray-900">Data Integrity</h3>
+                        <ul class="text-sm text-gray-600 mt-1 list-disc list-inside">
+                            <li>No duplicate entries allowed</li>
+                            <li>Real-time validation</li>
+                            <li>Error messages shown instantly</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Real-time validation
+function validateField(fieldId, value, validationType) {
+    const errorDiv = document.getElementById(fieldId + '_error');
+    
+    switch(validationType) {
+        case 'imei':
+            if (value && !/^\d{15}$/.test(value)) {
+                errorDiv.textContent = 'IMEI must be exactly 15 digits';
+                errorDiv.classList.remove('hidden');
+                return false;
+            }
+            break;
+        case 'serial':
+            if (!value || value.length !== 15) {
+                errorDiv.textContent = 'Serial number must be exactly 15 characters';
+                errorDiv.classList.remove('hidden');
+                return false;
+            }
+            break;
+    }
+    
+    errorDiv.classList.add('hidden');
+    return true;
+}
+
+// Add event listeners
+document.getElementById('serial_number').addEventListener('blur', function() {
+    validateField('serial_number', this.value, 'serial');
+});
+
+document.getElementById('imei1').addEventListener('input', function() {
+    // Only allow digits
+    this.value = this.value.replace(/\D/g, '');
+    validateField('imei1', this.value, 'imei');
+});
+
+document.getElementById('imei2').addEventListener('input', function() {
+    // Only allow digits
+    this.value = this.value.replace(/\D/g, '');
+    if (this.value) {
+        validateField('imei2', this.value, 'imei');
+    } else {
+        document.getElementById('imei2_error').classList.add('hidden');
+    }
+});
+
+// Form submission validation
+document.getElementById('deviceForm').addEventListener('submit', function(e) {
+    const serialNumber = document.getElementById('serial_number').value;
+    const imei1 = document.getElementById('imei1').value;
+    const imei2 = document.getElementById('imei2').value;
+    
+    let isValid = true;
+    
+    if (!validateField('serial_number', serialNumber, 'serial')) {
+        isValid = false;
+    }
+    
+    if (!validateField('imei1', imei1, 'imei')) {
+        isValid = false;
+    }
+    
+    if (imei2 && !validateField('imei2', imei2, 'imei')) {
+        isValid = false;
+    }
+    
+    // Check if IMEI1 and IMEI2 are the same
+    if (imei1 && imei2 && imei1 === imei2) {
+        document.getElementById('imei2_error').textContent = 'IMEI1 and IMEI2 cannot be the same';
+        document.getElementById('imei2_error').classList.remove('hidden');
+        isValid = false;
+    }
+    
+    if (!isValid) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

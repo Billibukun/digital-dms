@@ -1,0 +1,583 @@
+{% extends "base.html" %}
+
+{% block title %}ALGON Focal Dashboard - VERXID System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-green-50">
+    
+    <!-- Header Section -->
+    <div class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-100 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-6 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="p-3 bg-gradient-to-r from-green-600 to-green-700 rounded-xl shadow-lg">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">ALGON Focal Dashboard</h1>
+                        <p class="text-gray-600 mt-1">Manage devices for {{ current_user.lga.name if current_user.lga else 'your LGA' }}</p>
+                    </div>
+                </div>
+                
+                <!-- Location Info -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="text-right">
+                        <div class="text-lg font-semibold text-green-700">{{ current_user.lga.name if current_user.lga else 'No LGA' }}</div>
+                        <div class="text-sm text-gray-500">{{ current_user.state.name if current_user.state else 'No State' }}</div>
+                    </div>
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center">
+                    <div class="p-3 bg-blue-100 rounded-xl mr-4">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-gray-900">{{ stats.total_available if stats else 0 }}</div>
+                        <div class="text-gray-600 font-medium">Total Available</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center">
+                    <div class="p-3 bg-amber-100 rounded-xl mr-4">
+                        <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-gray-900">{{ stats.unclaimed if stats else 0 }}</div>
+                        <div class="text-gray-600 font-medium">Unclaimed</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center">
+                    <div class="p-3 bg-green-100 rounded-xl mr-4">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-gray-900">{{ stats.claimed if stats else 0 }}</div>
+                        <div class="text-gray-600 font-medium">Claimed</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-300">
+                <div class="flex items-center">
+                    <div class="p-3 bg-emerald-100 rounded-xl mr-4">
+                        <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-gray-900">{{ stats.distributed if stats else 0 }}</div>
+                        <div class="text-gray-600 font-medium">Distributed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:space-x-6 space-y-4 lg:space-y-0">
+                <div class="flex-1">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Search Devices</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                        <input type="text" id="device-search" 
+                               class="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
+                               placeholder="Search by Serial Number, IMEI1, or IMEI2...">
+                    </div>
+                </div>
+                
+                <div class="lg:w-48">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Filter by Status</label>
+                    <select id="status-filter" 
+                            class="block w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200">
+                        <option value="">All Statuses</option>
+                        <option value="unclaimed">Unclaimed</option>
+                        <option value="claimed">Claimed</option>
+                        <option value="distributed">Distributed</option>
+                    </select>
+                </div>
+                
+                <div class="lg:w-32">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">View</label>
+                    <div class="flex rounded-xl border border-gray-300 overflow-hidden">
+                        <button id="grid-view" class="flex-1 bg-green-600 text-white px-4 py-3 hover:bg-green-700 transition-colors">
+                            <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                            </svg>
+                        </button>
+                        <button id="list-view" class="flex-1 bg-gray-100 text-gray-600 px-4 py-3 hover:bg-gray-200 transition-colors">
+                            <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Management Actions -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">Device Management</h3>
+                    <p class="text-gray-600">Add new devices or manage existing ones</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="showAddDeviceModal()" 
+                            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300/20 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Add New Device
+                    </button>
+                    <button onclick="showSignOffModal()" 
+                            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-xl hover:from-purple-700 hover:to-purple-800 focus:outline-none focus:ring-4 focus:ring-purple-300/20 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Sign-Off Claims
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PDF Reports Section -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">PDF Reports</h3>
+                    <p class="text-gray-600">Download distribution reports and forms</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{{ url_for('generate_lga_distribution_pdf', lga_id=current_user.lga_id) }}" 
+                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-xl hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-4 focus:ring-red-300/20 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        LGA Distribution Report
+                    </a>
+                    {% if stats.distributed > 0 %}
+                    <div class="relative">
+                        <button id="individual-reports-btn" 
+                                class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300/20 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Individual Device Forms
+                            <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        <div id="individual-reports-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            <div class="py-2">
+                                <div class="px-4 py-2 text-sm text-gray-500 border-b">Select distributed device:</div>
+                                {% for device in devices %}
+                                    {% if device.status == 'distributed' %}
+                                    <a href="{{ url_for('generate_device_issuance_pdf', device_id=device.id) }}" 
+                                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                        {{ device.serial_number or device.imei1 }} - {{ device.recipient_name or 'Unknown' }}
+                                    </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Devices Section -->
+        {% if devices %}
+            <!-- Grid View -->
+            <div id="devices-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {% for device in devices %}
+                <div class="device-card bg-white rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden" 
+                     data-status="{{ device.status }}" 
+                     data-search="{{ (device.serial_number|default('') + ' ' + device.imei1|default('') + ' ' + (device.imei2|default(''))).lower() }}">
+                    
+                    <!-- Status Header -->
+                    <div class="px-6 py-4 {% if device.status == 'unclaimed' %}bg-amber-50 border-b border-amber-200{% elif device.status == 'claimed' %}bg-green-50 border-b border-green-200{% else %}bg-emerald-50 border-b border-emerald-200{% endif %}">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-600">{{ device.device_type|default('VERXID Tablet') }}</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {% if device.status == 'unclaimed' %}bg-amber-100 text-amber-800 border border-amber-200{% elif device.status == 'claimed' %}bg-green-100 text-green-800 border border-green-200{% else %}bg-emerald-100 text-emerald-800 border border-emerald-200{% endif %}">
+                                {{ device.status.title() }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Device Details -->
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">{{ device.serial_number or 'Pending SN' }}</h3>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">IMEI 1</div>
+                                <div class="text-sm font-mono text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{{ device.imei1 }}</div>
+                            </div>
+                            
+                            {% if device.imei2 %}
+                            <div>
+                                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">IMEI 2</div>
+                                <div class="text-sm font-mono text-gray-900 bg-gray-50 px-3 py-2 rounded-lg">{{ device.imei2 }}</div>
+                            </div>
+                            {% endif %}
+                            
+                            <div>
+                                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Model</div>
+                                <div class="text-sm text-gray-900">{{ device.model or 'VERXID Tablet' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="px-6 pb-6">
+                        {% if device.status == 'unclaimed' %}
+                        <div class="space-y-3">
+                            <button onclick="claimDevice({{ device.id }}, '{{ device.serial_number or device.imei1 }}')" 
+                                    class="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold py-3 px-4 rounded-xl hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-4 focus:ring-amber-300/20 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
+                                <div class="flex items-center justify-center">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3"/>
+                                    </svg>
+                                    Claim Device
+                                </div>
+                            </button>
+                            <div class="flex space-x-2">
+                                <button onclick="editDevice({{ device.id }})" 
+                                        class="flex-1 bg-blue-600 text-white font-semibold py-2 px-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300/20 transition-all duration-200 text-sm">
+                                    <div class="flex items-center justify-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                        Edit
+                                    </div>
+                                </button>
+                                <button onclick="rejectDevice({{ device.id }}, '{{ device.serial_number or device.imei1 }}')" 
+                                        class="flex-1 bg-red-600 text-white font-semibold py-2 px-3 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-300/20 transition-all duration-200 text-sm">
+                                    <div class="flex items-center justify-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                        Reject
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        {% elif device.status == 'claimed' %}
+                        <!-- Clean claimed device card with only distribute button -->
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-3">
+                            <div class="text-center mb-4">
+                                <div class="text-green-800 font-semibold text-sm mb-1">✅ Claimed</div>
+                                {% if device.claimed_at %}
+                                <div class="text-green-600 text-xs">{{ device.claimed_at.strftime('%d/%m/%Y at %H:%M') }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <button onclick="distributeDevice({{ device.id }}, '{{ device.serial_number or device.imei1 }}')" 
+                                class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold py-3 px-4 rounded-xl hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300/20 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
+                            <div class="flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                                Distribute Device
+                            </div>
+                        </button>
+                        {% else %}
+                        <!-- Clean distributed device card with no action buttons -->
+                        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+                            <div class="text-center">
+                                <div class="text-emerald-800 font-semibold text-sm mb-1">✅ Distributed</div>
+                                {% if device.distributed_at %}
+                                <div class="text-emerald-600 text-xs">{{ device.distributed_at.strftime('%d/%m/%Y at %H:%M') }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- List View (Hidden by default) -->
+            <div id="devices-table" class="hidden bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Device</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">IMEI Details</th>
+                                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            {% for device in devices %}
+                            <tr class="device-row hover:bg-gray-50" 
+                                data-status="{{ device.status }}" 
+                                data-search="{{ (device.serial_number|default('') + ' ' + device.imei1|default('') + ' ' + (device.imei2|default(''))).lower() }}">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-gray-900">{{ device.serial_number or 'Pending SN' }}</div>
+                                    <div class="text-sm text-gray-600">{{ device.device_type|default('VERXID Tablet') }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm">
+                                        <div class="font-mono text-gray-900">IMEI1: {{ device.imei1 }}</div>
+                                        {% if device.imei2 %}
+                                        <div class="font-mono text-gray-600">IMEI2: {{ device.imei2 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {% if device.status == 'unclaimed' %}bg-amber-100 text-amber-800 border border-amber-200{% elif device.status == 'claimed' %}bg-green-100 text-green-800 border border-green-200{% else %}bg-emerald-100 text-emerald-800 border border-emerald-200{% endif %}">
+                                        {{ device.status.title() }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    {% if device.status == 'unclaimed' %}
+                                    <button onclick="claimDevice({{ device.id }}, '{{ device.serial_number or device.imei1 }}')" 
+                                            class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                                        Claim
+                                    </button>
+                                    {% elif device.status == 'claimed' %}
+                                    <button onclick="distributeDevice({{ device.id }}, '{{ device.serial_number or device.imei1 }}')" 
+                                            class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                                        Distribute
+                                    </button>
+                                    {% else %}
+                                    <span class="text-emerald-600 text-sm font-medium">Distributed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        {% else %}
+            <!-- Empty State -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
+                <div class="mx-auto w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">No Devices Available</h3>
+                <p class="text-gray-600 max-w-md mx-auto">
+                    There are no devices assigned to your LGA yet. Contact your administrator if you need assistance.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('device-search');
+    const statusFilter = document.getElementById('status-filter');
+    const gridViewBtn = document.getElementById('grid-view');
+    const listViewBtn = document.getElementById('list-view');
+    const devicesGrid = document.getElementById('devices-grid');
+    const devicesTable = document.getElementById('devices-table');
+    
+    // Search and filter functionality
+    function filterDevices() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+        
+        const devices = document.querySelectorAll('.device-card, .device-row');
+        
+        devices.forEach(device => {
+            const matchesSearch = !searchTerm || device.dataset.search.includes(searchTerm);
+            const matchesStatus = !statusValue || device.dataset.status === statusValue;
+            
+            if (matchesSearch && matchesStatus) {
+                device.style.display = '';
+            } else {
+                device.style.display = 'none';
+            }
+        });
+    }
+    
+    searchInput.addEventListener('input', filterDevices);
+    statusFilter.addEventListener('change', filterDevices);
+    
+    // View toggle functionality
+    gridViewBtn.addEventListener('click', function() {
+        gridViewBtn.classList.remove('bg-gray-100', 'text-gray-600');
+        gridViewBtn.classList.add('bg-green-600', 'text-white');
+        listViewBtn.classList.remove('bg-green-600', 'text-white');
+        listViewBtn.classList.add('bg-gray-100', 'text-gray-600');
+        devicesGrid.classList.remove('hidden');
+        devicesTable.classList.add('hidden');
+    });
+    
+    listViewBtn.addEventListener('click', function() {
+        listViewBtn.classList.remove('bg-gray-100', 'text-gray-600');
+        listViewBtn.classList.add('bg-green-600', 'text-white');
+        gridViewBtn.classList.remove('bg-green-600', 'text-white');
+        gridViewBtn.classList.add('bg-gray-100', 'text-gray-600');
+        devicesTable.classList.remove('hidden');
+        devicesGrid.classList.add('hidden');
+    });
+});
+
+// Device claiming functionality
+function claimDevice(deviceId, deviceName) {
+    if (confirm(`Are you sure you want to claim device "${deviceName}"?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/focal/claim_device';
+        
+        const deviceInput = document.createElement('input');
+        deviceInput.type = 'hidden';
+        deviceInput.name = 'device_id';
+        deviceInput.value = deviceId;
+        form.appendChild(deviceInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Device distribution functionality
+function distributeDevice(deviceId, deviceName) {
+    if (confirm(`Are you sure you want to distribute device "${deviceName}"?`)) {
+        window.location.href = `/focal/distribute/${deviceId}`;
+    }
+}
+
+// Device editing functionality
+function editDevice(deviceId) {
+    window.location.href = `/focal/edit_device/${deviceId}`;
+}
+
+// Device rejection functionality
+function rejectDevice(deviceId, deviceName) {
+    const reason = prompt(`Please provide a reason for rejecting device "${deviceName}":`);
+    if (reason && reason.trim()) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/focal/reject_device';
+        
+        const deviceInput = document.createElement('input');
+        deviceInput.type = 'hidden';
+        deviceInput.name = 'device_id';
+        deviceInput.value = deviceId;
+        form.appendChild(deviceInput);
+        
+        const reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'rejection_reason';
+        reasonInput.value = reason.trim();
+        form.appendChild(reasonInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Individual reports dropdown functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const reportsBtn = document.getElementById('individual-reports-btn');
+    const reportsDropdown = document.getElementById('individual-reports-dropdown');
+    
+    if (reportsBtn && reportsDropdown) {
+        reportsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            reportsDropdown.classList.toggle('hidden');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            reportsDropdown.classList.add('hidden');
+        });
+        
+        // Prevent dropdown from closing when clicking inside
+        reportsDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    // Check sign-off button status based on collections vs wards
+    checkSignOffButtonStatus();
+});
+
+// Add Device Modal functionality
+function showAddDeviceModal() {
+    alert('Add Device functionality will be implemented. For now, please use the admin CSV upload feature to add devices in bulk.');
+}
+
+// Sign-Off Claims functionality
+function showSignOffModal() {
+    const totalCollected = {{ stats.distributed if stats else 0 }};
+    const totalWards = {{ total_wards if total_wards is defined else 0 }};
+    
+    if (totalCollected < totalWards) {
+        alert(`Cannot sign-off claims yet. You have distributed ${totalCollected} devices but need to cover all ${totalWards} wards in your LGA.`);
+        return;
+    }
+    
+    if (confirm(`You are about to sign-off claims for ${totalCollected} distributed devices across ${totalWards} wards. This action will mark the distribution process as complete for your LGA. Continue?`)) {
+        // Create form to submit sign-off
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/focal/sign_off_claims';
+        
+        const lgaInput = document.createElement('input');
+        lgaInput.type = 'hidden';
+        lgaInput.name = 'lga_id';
+        lgaInput.value = '{{ current_user.lga_id }}';
+        form.appendChild(lgaInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Check if sign-off button should be enabled
+function checkSignOffButtonStatus() {
+    const totalCollected = {{ stats.distributed if stats else 0 }};
+    const totalWards = {{ total_wards if total_wards is defined else 0 }};
+    const signOffBtn = document.querySelector('button[onclick="showSignOffModal()"]');
+    
+    if (signOffBtn) {
+        if (totalCollected < totalWards) {
+            signOffBtn.disabled = true;
+            signOffBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            signOffBtn.title = `Need to distribute devices to all ${totalWards} wards. Currently distributed: ${totalCollected}`;
+        } else {
+            signOffBtn.disabled = false;
+            signOffBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            signOffBtn.title = 'All wards covered. Ready to sign-off claims.';
+        }
+    }
+}
+</script>
+{% endblock %}

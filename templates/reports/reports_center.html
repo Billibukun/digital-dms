@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Reports Center - VERXID System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="p-3 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Reports Center</h1>
+                        <p class="text-gray-600 mt-1">Generate and download PDF reports and forms</p>
+                    </div>
+                </div>
+                
+                <!-- User Info -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="text-right">
+                        <div class="text-lg font-semibold text-blue-700">{{ user_name }}</div>
+                        <div class="text-sm text-gray-500">{{ user_role.replace('_', ' ').title() }}</div>
+                    </div>
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {% if grouped_reports %}
+            <!-- Reports Grid -->
+            <div class="space-y-8">
+                {% for category, reports in grouped_reports.items() %}
+                <div>
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ category }}</h2>
+                        <div class="h-1 w-20 bg-gradient-to-r from-blue-600 to-blue-700 rounded"></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for report in reports %}
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-blue-300 group">
+                            <div class="p-6">
+                                <!-- Report Icon -->
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors duration-300">
+                                        <i class="{{ report.icon }} text-2xl text-blue-600"></i>
+                                    </div>
+                                    {% if report.get('state') %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        {{ report.state }}
+                                    </span>
+                                    {% elif report.get('lga') %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        {{ report.lga }}
+                                    </span>
+                                    {% elif report.get('device') %}
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        {{ report.device }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Report Title -->
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors duration-300">
+                                    {{ report.title }}
+                                </h3>
+                                
+                                <!-- Report Description -->
+                                <p class="text-sm text-gray-600 mb-4 line-clamp-2">
+                                    {{ report.description }}
+                                </p>
+                                
+                                <!-- Download Button -->
+                                <a href="{{ report.url }}" 
+                                   class="inline-flex items-center w-full justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500/20 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
+                                   target="_blank">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-4-4m4 4l4-4m-7 4h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 002 2z"/>
+                                    </svg>
+                                    Download PDF
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Report Stats -->
+            <div class="mt-12 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Available Reports</h3>
+                    <div class="flex justify-center space-x-8">
+                        {% for category, reports in grouped_reports.items() %}
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-blue-600">{{ reports|length }}</div>
+                            <div class="text-sm text-gray-600">{{ category }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+        {% else %}
+            <!-- No Reports Available -->
+            <div class="text-center py-16">
+                <div class="mx-auto w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">No Reports Available</h3>
+                <p class="text-gray-600 max-w-md mx-auto mb-6">
+                    There are no reports available for your current role and assigned location. Reports will become available as devices are distributed and data is processed.
+                </p>
+                <a href="{{ url_for('dashboard') }}" 
+                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-lg hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500/20 shadow-lg transition-all duration-200">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Back to Dashboard
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Help Modal -->
+<div id="helpModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900">Reports Help</h3>
+                <button onclick="closeHelpModal()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="space-y-4 text-sm text-gray-600">
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Report Types</h4>
+                    <ul class="space-y-1 ml-4">
+                        <li>• <strong>State Reports:</strong> High-level summaries for entire states</li>
+                        <li>• <strong>LGA Reports:</strong> Detailed reports for specific local government areas</li>
+                        <li>• <strong>Device Forms:</strong> Individual issuance forms for distributed devices</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Access Levels</h4>
+                    <ul class="space-y-1 ml-4">
+                        <li>• <strong>Super Admin:</strong> Access to all reports across all states</li>
+                        <li>• <strong>State Admin:</strong> Reports limited to assigned state</li>
+                        <li>• <strong>ALGON Focal:</strong> Reports for assigned LGA and distributed devices</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">PDF Features</h4>
+                    <ul class="space-y-1 ml-4">
+                        <li>• Professional formatting with organizational logos</li>
+                        <li>• Digital signatures and timestamps</li>
+                        <li>• Print-ready layouts for official documentation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Help Button -->
+<button onclick="showHelpModal()" 
+        class="fixed bottom-6 right-6 p-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 z-40">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+</button>
+
+<script>
+function showHelpModal() {
+    document.getElementById('helpModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeHelpModal() {
+    document.getElementById('helpModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.getElementById('helpModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeHelpModal();
+    }
+});
+</script>
+{% endblock %}

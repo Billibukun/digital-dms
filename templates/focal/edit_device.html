@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Edit Device - VERXID System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-6">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Edit Device</h1>
+            <p class="text-gray-600">Update device information and details</p>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Device Information
+                </h2>
+            </div>
+
+            <form method="POST" class="p-6 space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Serial Number -->
+                    <div>
+                        <label for="serial_number" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Serial Number <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="serial_number" 
+                               name="serial_number" 
+                               value="{{ device.serial_number or '' }}" 
+                               required
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    </div>
+
+                    <!-- Device Type -->
+                    <div>
+                        <label for="device_type" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Device Type
+                        </label>
+                        <select id="device_type" 
+                                name="device_type"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="Tablet" {{ 'selected' if device.device_type == 'Tablet' else '' }}>Tablet</option>
+                            <option value="Phone" {{ 'selected' if device.device_type == 'Phone' else '' }}>Phone</option>
+                            <option value="Other" {{ 'selected' if device.device_type == 'Other' else '' }}>Other</option>
+                        </select>
+                    </div>
+
+                    <!-- IMEI 1 -->
+                    <div>
+                        <label for="imei1" class="block text-sm font-semibold text-gray-700 mb-2">
+                            IMEI 1 <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="imei1" 
+                               name="imei1" 
+                               value="{{ device.imei1 or '' }}" 
+                               required
+                               pattern="[0-9]{15}"
+                               title="IMEI must be 15 digits"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors font-mono">
+                    </div>
+
+                    <!-- IMEI 2 -->
+                    <div>
+                        <label for="imei2" class="block text-sm font-semibold text-gray-700 mb-2">
+                            IMEI 2 <span class="text-gray-400">(Optional)</span>
+                        </label>
+                        <input type="text" 
+                               id="imei2" 
+                               name="imei2" 
+                               value="{{ device.imei2 or '' }}" 
+                               pattern="[0-9]{15}"
+                               title="IMEI must be 15 digits"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors font-mono">
+                    </div>
+
+                    <!-- Model -->
+                    <div class="md:col-span-2">
+                        <label for="model" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Device Model
+                        </label>
+                        <input type="text" 
+                               id="model" 
+                               name="model" 
+                               value="{{ device.model or 'VERXID Tablet' }}" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    </div>
+                </div>
+
+                <!-- Current Status Info -->
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3">Current Device Status</h3>
+                    <div class="grid md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-500">Status:</span>
+                            <span class="ml-2 font-semibold capitalize 
+                                {% if device.status == 'unclaimed' %}text-amber-600
+                                {% elif device.status == 'claimed' %}text-blue-600
+                                {% elif device.status == 'distributed' %}text-green-600
+                                {% else %}text-red-600{% endif %}">
+                                {{ device.status }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">LGA:</span>
+                            <span class="ml-2 font-semibold">{{ device.lga.name if device.lga else 'Not assigned' }}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">State:</span>
+                            <span class="ml-2 font-semibold">{{ device.state.name if device.state else 'Not assigned' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" 
+                            class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-300/20 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
+                        <div class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Update Device
+                        </div>
+                    </button>
+                    <a href="{{ url_for('algon_dashboard') }}" 
+                       class="flex-1 bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-300 focus:outline-none focus:ring-4 focus:ring-gray-200 transition-all duration-200 text-center">
+                        <div class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Cancel
+                        </div>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const imei1 = document.getElementById('imei1').value;
+    const imei2 = document.getElementById('imei2').value;
+    
+    if (imei1 && imei1.length !== 15) {
+        e.preventDefault();
+        alert('IMEI 1 must be exactly 15 digits');
+        return false;
+    }
+    
+    if (imei2 && imei2.length !== 15) {
+        e.preventDefault();
+        alert('IMEI 2 must be exactly 15 digits');
+        return false;
+    }
+});
+</script>
+{% endblock %}

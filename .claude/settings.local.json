@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(dir:*)",
+      "Bash(sed:*)",
+      "Read(\\/**)",
+      "Bash(del \"C:\\Users\\billi\\OneDrive\\Desktop\\apps\\device_app\\claude\\error.txt\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

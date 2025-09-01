@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Device Documentation Management System{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1f2937',
+                        secondary: '#374151',
+                        accent: '#3b82f6',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50 font-sans">
+    {% if current_user.is_authenticated %}
+    <nav class="bg-gradient-to-r from-primary to-secondary shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('dashboard') }}" class="flex items-center text-white hover:text-blue-200 transition-colors duration-200">
+                        <i class="fas fa-file-alt text-2xl mr-3"></i>
+                        <span class="font-bold text-xl">DDMS</span>
+                    </a>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="{{ url_for('dashboard') }}" class="text-white hover:bg-white hover:bg-opacity-20 hover:text-blue-200 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                        </a>
+                        <a href="{{ url_for('reports_center') }}" class="text-white hover:bg-white hover:bg-opacity-20 hover:text-blue-200 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200">
+                            <i class="fas fa-chart-bar mr-2"></i>Reports
+                        </a>
+                        <a href="{{ url_for('upload_signature_page') }}" class="text-white hover:bg-white hover:bg-opacity-20 hover:text-blue-200 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200">
+                            <i class="fas fa-signature mr-2"></i>My Signature
+                        </a>
+                        
+                        {% if current_user.role in ['super_admin', 'state_admin'] %}
+                        <div class="relative group">
+                            <button class="text-white hover:bg-white hover:bg-opacity-20 hover:text-blue-200 px-3 py-2 rounded-md text-sm font-medium flex items-center transition-all duration-200">
+                                <i class="fas fa-users-cog mr-2"></i>Administration
+                                <i class="fas fa-chevron-down ml-1"></i>
+                            </button>
+                            <div class="absolute right-0 w-48 mt-2 py-2 bg-white rounded-md shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                                <a href="{{ url_for('manage_users') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-accent hover:text-white transition-colors duration-200">
+                                    <i class="fas fa-users mr-2"></i>Manage Users
+                                </a>
+                                <a href="{{ url_for('manage_devices') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-accent hover:text-white transition-colors duration-200">
+                                    <i class="fas fa-tablet-alt mr-2"></i>Manage Devices
+                                </a>
+                                <a href="{{ url_for('data_management') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-accent hover:text-white transition-colors duration-200">
+                                    <i class="fas fa-database mr-2"></i>Data Management
+                                </a>
+                                <a href="{{ url_for('csv_upload') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-accent hover:text-white transition-colors duration-200">
+                                    <i class="fas fa-upload mr-2"></i>CSV Upload
+                                </a>
+                                <a href="{{ url_for('barcode_scanner') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-accent hover:text-white transition-colors duration-200">
+                                    <i class="fas fa-qrcode mr-2"></i>Barcode Scanner
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if current_user.role == 'algon_focal' %}
+                        <a href="{{ url_for('algon_dashboard') }}" class="text-white hover:bg-white hover:bg-opacity-20 hover:text-blue-200 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200">
+                            <i class="fas fa-clipboard-list mr-2"></i>Distribute Devices
+                        </a>
+                        {% endif %}
+                        
+                        {% if current_user.role == 'dcr_focal' %}
+                        <a href="{{ url_for('dcr_witness_dashboard') }}" class="text-white hover:bg-white hover:bg-opacity-20 hover:text-blue-200 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200">
+                            <i class="fas fa-eye mr-2"></i>Witness Claims
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="relative group">
+                    <button class="flex items-center text-white hover:text-blue-200 transition-colors duration-200">
+                        <div class="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-2">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="hidden md:block font-medium">{{ current_user.full_name }}</span>
+                        <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                    <div class="absolute right-0 w-48 mt-2 py-2 bg-white rounded-md shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                        <div class="px-4 py-2 text-sm text-gray-500 border-b">
+                            {{ current_user.role.replace('_', ' ').title() }}
+                        </div>
+                        <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white transition-colors duration-200">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button type="button" class="text-white hover:text-blue-200 focus:outline-none focus:text-blue-200 transition-colors duration-200" id="mobile-menu-button">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-secondary">
+                <a href="{{ url_for('dashboard') }}" class="text-white hover:bg-white hover:bg-opacity-20 block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                </a>
+                <a href="{{ url_for('reports_center') }}" class="text-white hover:bg-white hover:bg-opacity-20 block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-chart-bar mr-2"></i>Reports
+                </a>
+                <a href="{{ url_for('upload_signature_page') }}" class="text-white hover:bg-white hover:bg-opacity-20 block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-signature mr-2"></i>My Signature
+                </a>
+                {% if current_user.role in ['super_admin', 'state_admin'] %}
+                <a href="{{ url_for('manage_users') }}" class="text-white hover:bg-white hover:bg-opacity-20 block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-users mr-2"></i>Manage Users
+                </a>
+                <a href="{{ url_for('manage_devices') }}" class="text-white hover:bg-white hover:bg-opacity-20 block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-tablet-alt mr-2"></i>Manage Devices
+                </a>
+                <a href="{{ url_for('barcode_scanner') }}" class="text-white hover:bg-white hover:bg-opacity-20 block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-qrcode mr-2"></i>Barcode Scanner
+                </a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}" class="text-white hover:bg-red-500 block px-3 py-2 rounded-md text-base font-medium">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="{% if current_user.is_authenticated %}max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8{% else %}min-h-screen flex items-center justify-center px-4{% endif %}">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6">
+                    {% for category, message in messages %}
+                        <div class="bg-{% if category == 'error' %}red-100 border-red-400 text-red-700{% elif category == 'success' %}green-100 border-green-400 text-green-700{% elif category == 'warning' %}yellow-100 border-yellow-400 text-yellow-700{% else %}blue-100 border-blue-400 text-blue-700{% endif %} px-4 py-3 rounded border mb-4 flex items-center justify-between" role="alert">
+                            <div class="flex items-center">
+                                <i class="fas fa-{% if category == 'error' %}exclamation-triangle{% elif category == 'success' %}check-circle{% elif category == 'warning' %}exclamation-circle{% else %}info-circle{% endif %} mr-3"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                            <button class="text-lg leading-none hover:text-gray-600 transition-colors duration-200" onclick="this.parentElement.remove()">
+                                &times;
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    {% if current_user.is_authenticated %}
+    <footer class="bg-gray-800 text-white mt-auto">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-file-alt text-accent"></i>
+                    <span class="text-sm text-gray-300">Device Documentation Management System</span>
+                </div>
+                <div class="text-sm text-gray-400">
+                    &copy; 2024 Data Druid Services | Implemented by Ibukunoluwa Omonijo
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Auto-hide flash messages after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('[role="alert"]');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

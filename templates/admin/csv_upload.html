@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+
+{% block title %}Data Upload Center - VERXID System{% endblock %}
+
+{% block content %}
+<!-- Modern Clean CSV Upload Interface -->
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-green-50">
+    
+    <!-- Header Section -->
+    <div class="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-100 sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto px-6 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('data_management') }}" 
+                       class="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Data Upload Center</h1>
+                        <p class="text-gray-500 text-sm">Bulk import data for the VERXID system</p>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="hidden md:flex items-center space-x-6 text-sm">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600">CSV</div>
+                        <div class="text-gray-500">Format</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600">5</div>
+                        <div class="text-gray-500">Data Types</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Main Upload Section -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Upload Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-white/20 rounded-lg">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-semibold text-white">Upload Your Data</h2>
+                                <p class="text-green-100 text-sm">Select data type and upload CSV file</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6">
+                        <form method="POST" enctype="multipart/form-data" action="{{ url_for('csv_upload') }}" class="space-y-6">
+                            
+                            <!-- Step 1: Data Type Selection -->
+                            <div class="space-y-3">
+                                <label class="text-sm font-semibold text-gray-700 flex items-center">
+                                    <span class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3">1</span>
+                                    Select Data Type
+                                </label>
+                                <select id="upload_type" name="upload_type" required 
+                                        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200">
+                                    <option value="">Choose data type...</option>
+                                    <option value="devices">📱 Devices</option>
+                                    <option value="focal_persons">👤 Focal Persons</option>
+                                    <option value="states">🏛️ States</option>
+                                    <option value="lgas">🏢 LGAs</option>
+                                    <option value="wards">📍 Wards</option>
+                                </select>
+                            </div>
+
+                            <!-- Step 2: Template Download -->
+                            <div id="template-section" class="space-y-3 hidden">
+                                <label class="text-sm font-semibold text-gray-700 flex items-center">
+                                    <span class="bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3">2</span>
+                                    Download Template
+                                </label>
+                                <div id="template-card" class="bg-gradient-to-r from-purple-50 to-green-50 rounded-xl p-4 border border-purple-200">
+                                    <div id="template-content">
+                                        <!-- Dynamic template content -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: File Upload -->
+                            <div class="space-y-3">
+                                <label class="text-sm font-semibold text-gray-700 flex items-center">
+                                    <span class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3">3</span>
+                                    Upload File
+                                </label>
+                                
+                                <!-- Drag & Drop Zone -->
+                                <div id="drop-zone" class="relative">
+                                    <input type="file" id="csv_file" name="csv_file" accept=".csv" required class="sr-only">
+                                    <label for="csv_file" 
+                                           class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                                        <div class="flex flex-col items-center justify-center pt-5 pb-6" id="drop-content">
+                                            <svg class="w-8 h-8 mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                            </svg>
+                                            <p class="text-sm text-gray-600 font-medium">Click to upload or drag and drop</p>
+                                            <p class="text-xs text-gray-500">CSV files only (Max 16MB)</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <!-- File Preview -->
+                                <div id="file-preview" class="hidden bg-green-50 rounded-lg p-4 border border-green-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="p-2 bg-green-600 rounded-lg">
+                                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-green-900" id="file-name"></p>
+                                                <p class="text-sm text-green-600" id="file-size"></p>
+                                            </div>
+                                        </div>
+                                        <button type="button" id="remove-file" 
+                                                class="text-red-500 hover:text-red-700 p-1">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="pt-4">
+                                <button type="submit" id="submit-btn"
+                                        class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="flex items-center justify-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                        </svg>
+                                        Process Upload
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                {% if results %}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            Upload Results
+                        </h3>
+                    </div>
+                    
+                    <div class="p-6 space-y-4">
+                        <!-- Success Stats -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                <div class="text-2xl font-bold text-green-600">{{ results.success }}</div>
+                                <div class="text-green-700 text-sm font-medium">Records Processed</div>
+                            </div>
+                            <div class="bg-red-50 rounded-lg p-4 border border-red-200">
+                                <div class="text-2xl font-bold text-red-600">{{ results.errors|length }}</div>
+                                <div class="text-red-700 text-sm font-medium">Failed Records</div>
+                            </div>
+                        </div>
+
+                        <!-- Error Details -->
+                        {% if results.errors %}
+                        <div class="bg-red-50 rounded-lg border border-red-200">
+                            <div class="p-4 border-b border-red-200">
+                                <h4 class="font-semibold text-red-800">Error Details</h4>
+                            </div>
+                            <div class="max-h-64 overflow-y-auto">
+                                <table class="w-full">
+                                    <thead class="bg-red-100">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-red-700 uppercase">Row</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-red-700 uppercase">Error</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-red-200">
+                                        {% for error in results.errors %}
+                                        <tr class="hover:bg-red-25">
+                                            <td class="px-4 py-3 text-sm font-medium text-red-800">{{ error.row }}</td>
+                                            <td class="px-4 py-3 text-sm text-red-700">{{ error.message }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                
+                <!-- Quick Guide -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Quick Guide
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="space-y-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">1</div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">Choose Data Type</p>
+                                    <p class="text-xs text-gray-600">Select the type of data you want to upload</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">2</div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">Download Template</p>
+                                    <p class="text-xs text-gray-600">Get the CSV template with sample data</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">3</div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-800">Upload & Process</p>
+                                    <p class="text-xs text-gray-600">Upload your completed CSV file</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requirements -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                            </svg>
+                            Important Notes
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="space-y-3 text-sm">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+                                </svg>
+                                <span class="text-gray-700">UTF-8 encoding required</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+                                </svg>
+                                <span class="text-gray-700">First row must be headers</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+                                </svg>
+                                <span class="text-gray-700">NIN must be 11 digits</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/>
+                                </svg>
+                                <span class="text-gray-700">No duplicate entries</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadTypeSelect = document.getElementById('upload_type');
+    const templateSection = document.getElementById('template-section');
+    const templateContent = document.getElementById('template-content');
+    const fileInput = document.getElementById('csv_file');
+    const dropZone = document.getElementById('drop-zone');
+    const filePreview = document.getElementById('file-preview');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const removeFileBtn = document.getElementById('remove-file');
+    const submitBtn = document.getElementById('submit-btn');
+
+    const templates = {
+        devices: {
+            name: 'Devices Template',
+            icon: '📱',
+            description: 'Template for uploading device information with state/LGA reference data',
+            fields: ['serial_number*', 'imei1*', 'imei2*', 'device_type', 'model', 'manufacturer', 'state_code', 'lga_code'],
+            downloadUrl: '/admin/csv_template/devices'
+        },
+        focal_persons: {
+            name: 'Focal Persons Template',
+            icon: '👤',
+            description: 'Template for uploading focal person data with NIN, banking details and state/LGA reference data',
+            fields: ['name*', 'phone*', 'email*', 'lga_code*', 'state_code*', 'role_type*', 'nin*', 'bank_name', 'account_number'],
+            downloadUrl: '/admin/csv_template/focals'
+        },
+        states: {
+            name: 'States Template',
+            icon: '🏛️',
+            description: 'Template for uploading state information with sample data',
+            fields: ['name*', 'code*'],
+            downloadUrl: '/admin/csv_template/states'
+        },
+        lgas: {
+            name: 'LGAs Template',
+            icon: '🏢',
+            description: 'Template for uploading Local Government Area data with state reference data',
+            fields: ['name*', 'code*', 'state_code*'],
+            downloadUrl: '/admin/csv_template/lgas'
+        },
+        wards: {
+            name: 'Wards Template',
+            icon: '📍',
+            description: 'Template for uploading ward and ward officer information with state/LGA reference data',
+            fields: ['name*', 'lga_code*', 'state_code*', 'ward_officer_name', 'ward_officer_nin', 'registration_center_name'],
+            downloadUrl: '/admin/csv_template/wards'
+        }
+    };
+
+    uploadTypeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        if (selectedType && templates[selectedType]) {
+            const template = templates[selectedType];
+            templateSection.classList.remove('hidden');
+            
+            const downloadButton = `<a href="${template.downloadUrl}" class="inline-flex items-center px-4 py-2 bg-white border border-purple-300 rounded-lg text-purple-700 hover:bg-purple-50 transition-colors duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-4-4m4 4l4-4m-4-4V4"/>
+                    </svg>
+                    Download Template with Reference Data
+                 </a>`;
+            
+            templateContent.innerHTML = `
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <span class="text-2xl">${template.icon}</span>
+                            <h4 class="font-semibold text-gray-800">${template.name}</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">${template.description}</p>
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            ${template.fields.slice(0, 4).map(field => 
+                                `<span class="text-xs px-2 py-1 bg-white rounded-full border ${field.includes('*') ? 'text-red-700 border-red-200' : 'text-gray-700 border-gray-200'}">${field}</span>`
+                            ).join('')}
+                            ${template.fields.length > 4 ? `<span class="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">+${template.fields.length - 4} more</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        ${downloadButton}
+                    </div>
+                </div>
+            `;
+        } else {
+            templateSection.classList.add('hidden');
+        }
+    });
+
+    // File handling
+    function handleFile(file) {
+        if (file && file.type === 'text/csv') {
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+            filePreview.classList.remove('hidden');
+            submitBtn.disabled = false;
+        }
+    }
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFile(e.target.files[0]);
+        }
+    });
+
+    // Drag and drop
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-green-500', 'bg-green-50');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('border-green-500', 'bg-green-50');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-green-500', 'bg-green-50');
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            handleFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    removeFileBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        filePreview.classList.add('hidden');
+        submitBtn.disabled = true;
+    });
+
+    // Generate template function
+    window.downloadGeneratedTemplate = function(type) {
+        const template = templates[type];
+        if (template) {
+            const headers = template.fields.map(f => f.replace('*', '')).join(',');
+            const blob = new Blob([headers], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_template.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    };
+});
+</script>
+{% endblock %}

@@ -1,0 +1,660 @@
+{% extends "base.html" %}
+
+{% block title %}DCR Witness Dashboard - VERXID System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-green-50 py-8">
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <!-- Header -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="p-3 bg-green-100 rounded-xl mr-4">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">DCR Witness Dashboard</h1>
+                        <p class="text-gray-600 mt-1">Monitor and witness device distributions</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        {{ current_user.lga.name if current_user.lga else 'No LGA' }}
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-800 border border-green-200">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                        </svg>
+                        {{ current_user.state.name if current_user.state else 'No State' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Pending Distributions -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-yellow-100 rounded-lg mr-3">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900">Pending Distributions</h3>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">{{ pending_claims|length }}</div>
+                        <p class="text-sm text-gray-600">Awaiting witness confirmation</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Witnessed Today -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-green-100 rounded-lg mr-3">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900">Witnessed Today</h3>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">0</div>
+                        <p class="text-sm text-gray-600">Confirmed distributions</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Witnessed -->
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="flex items-center mb-2">
+                            <div class="p-2 bg-blue-100 rounded-lg mr-3">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900">Total Witnessed</h3>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-900 mb-1">0</div>
+                        <p class="text-sm text-gray-600">All time confirmations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribution Witness Table -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-green-100 rounded-lg mr-3">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">Distributions Awaiting Witness</h2>
+                            <p class="text-gray-600">Review and witness device distributions to ward officers</p>
+                        </div>
+                    </div>
+                    {% if pending_claims %}
+                    <button onclick="bulkWitnessModal()" 
+                            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300/20 transition-all duration-200 transform hover:scale-[1.02] shadow-lg">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                        Witness All
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="p-6">
+                {% if pending_claims %}
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-4 px-4 font-semibold text-gray-900">Device Information</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-900">Distributed By</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-900">Distribution Date</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-900">Status</th>
+                                <th class="text-left py-4 px-4 font-semibold text-gray-900">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for claim in pending_claims %}
+                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                <td class="py-4 px-4">
+                                    <div>
+                                        <div class="font-semibold text-gray-900">{{ claim.device.serial_number or 'Pending SN' }}</div>
+                                        <div class="text-sm text-gray-600 font-mono mt-1">
+                                            {{ claim.device.imei1 }}{% if claim.device.imei2 %} | {{ claim.device.imei2 }}{% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <div>
+                                        <div class="font-semibold text-gray-900">{{ claim.claimer.full_name }}</div>
+                                        <div class="text-sm text-gray-600">{{ claim.claimer.organization or 'ALGON Focal' }}</div>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <div class="text-sm text-gray-900">
+                                        {{ claim.claim_date.strftime('%d/%m/%Y') if claim.claim_date else 'N/A' }}
+                                    </div>
+                                    <div class="text-xs text-gray-600">
+                                        {{ claim.claim_date.strftime('%H:%M') if claim.claim_date else '' }}
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <div class="space-y-1">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold {% if claim.testing_completed %}bg-green-100 text-green-800 border border-green-200{% else %}bg-gray-100 text-gray-600 border border-gray-200{% endif %}">
+                                            Testing {% if claim.testing_completed %}Complete{% else %}Pending{% endif %}
+                                        </span>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold {% if claim.verification_completed %}bg-green-100 text-green-800 border border-green-200{% else %}bg-gray-100 text-gray-600 border border-gray-200{% endif %}">
+                                            Verification {% if claim.verification_completed %}Complete{% else %}Pending{% endif %}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4">
+                                    <button onclick="witnessModal({{ claim.id }}, '{{ claim.claimer.full_name }}', '{{ claim.device.serial_number or 'Pending SN' }}')" 
+                                            class="inline-flex items-center px-3 py-2 bg-blue-600 text-white font-semibold text-sm rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300/20 transition-all duration-200 shadow-lg hover:shadow-xl">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                        Witness
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-12">
+                    <div class="p-4 bg-gray-100 rounded-full mx-auto w-16 h-16 flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No Distributions Awaiting Witness</h3>
+                    <p class="text-gray-600 max-w-md mx-auto">All device distributions in your LGA have been witnessed or there are no pending distributions to confirm.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Witness Modal -->
+<div id="witnessModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900">Witness Device Distribution</h3>
+                <button onclick="closeModal('witnessModal')" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-blue-800 font-medium">Please review the distribution details and provide your witness signature to confirm the device has been properly distributed to a ward officer.</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6" id="claim-details">
+                <!-- Distribution details will be populated by JavaScript -->
+            </div>
+            
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-gray-900 mb-4">Witness Verification Checklist</h4>
+                <div class="space-y-3">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="verify-device-present" class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <span class="ml-3 text-gray-700">Device is physically present and matches the distribution details</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="verify-testing" class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <span class="ml-3 text-gray-700">ALGON focal has demonstrated proper distribution procedures</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="verify-condition" class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <span class="ml-3 text-gray-700">Device is in good working condition and properly documented</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="verify-procedures" class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <span class="ml-3 text-gray-700">All distribution procedures have been followed correctly</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">DCR Witness Signature *</label>
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50">
+                    <canvas id="witness-signature-pad" width="600" height="150" 
+                            class="cursor-crosshair bg-white rounded-lg border border-gray-200 w-full"></canvas>
+                    <div class="flex justify-between mt-3">
+                        <button type="button" id="clear-witness-signature" 
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300/20">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Clear
+                        </button>
+                        <button type="button" id="load-saved-witness-signature" 
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-300 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-4 focus:ring-blue-300/20">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                            </svg>
+                            Use Saved Signature
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label for="witness-notes" class="block text-sm font-semibold text-gray-700 mb-2">Witness Notes (Optional)</label>
+                <textarea id="witness-notes" rows="3" 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none" 
+                          placeholder="Any observations or comments about the witnessing process..."></textarea>
+            </div>
+        </div>
+        <div class="p-6 border-t border-gray-100 flex justify-end space-x-4">
+            <button onclick="closeModal('witnessModal')" 
+                    class="px-6 py-3 text-gray-700 bg-gray-100 font-semibold rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-300/20 transition-all duration-200">
+                Cancel
+            </button>
+            <button id="submit-witness" disabled
+                    class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                Complete Witness
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Witness Modal -->
+<div id="bulkWitnessModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-bold text-gray-900">Bulk Witness All Distributions</h3>
+                <button onclick="closeModal('bulkWitnessModal')" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="p-6">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                    <p class="text-yellow-800 font-medium">You are about to witness all pending distributions ({{ pending_claims|length }} distributions). This action cannot be undone.</p>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-gray-900 mb-4">Bulk Witness Confirmation</h4>
+                <div class="space-y-3">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="bulk-verify-all" class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <span class="ml-3 text-gray-700">I confirm that I have verified all devices and their distributions meet the required standards</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="bulk-acknowledge" class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+                        <span class="ml-3 text-gray-700">I acknowledge that all ALGON focal persons have completed proper distribution procedures</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">DCR Bulk Witness Signature *</label>
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50">
+                    <canvas id="bulk-witness-signature-pad" width="500" height="120" 
+                            class="cursor-crosshair bg-white rounded-lg border border-gray-200 w-full"></canvas>
+                    <div class="flex justify-center mt-3">
+                        <button type="button" id="clear-bulk-signature" 
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-300/20">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="p-6 border-t border-gray-100 flex justify-end space-x-4">
+            <button onclick="closeModal('bulkWitnessModal')" 
+                    class="px-6 py-3 text-gray-700 bg-gray-100 font-semibold rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-300/20 transition-all duration-200">
+                Cancel
+            </button>
+            <button id="submit-bulk-witness" disabled
+                    class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-xl hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg class="w-5 h-5 mr-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                Witness All Distributions
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let witnessSignaturePad;
+let bulkSignaturePad;
+let currentClaimId;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSignaturePads();
+    setupModalValidation();
+});
+
+// Modal utility functions
+function showModal(modalId) {
+    document.getElementById(modalId).classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+function initializeSignaturePads() {
+    // Individual witness signature pad
+    const witnessCanvas = document.getElementById('witness-signature-pad');
+    witnessSignaturePad = createSignaturePad(witnessCanvas);
+    
+    // Bulk witness signature pad
+    const bulkCanvas = document.getElementById('bulk-witness-signature-pad');
+    bulkSignaturePad = createSignaturePad(bulkCanvas);
+    
+    // Clear buttons
+    document.getElementById('clear-witness-signature').addEventListener('click', () => {
+        witnessSignaturePad.clear();
+        checkWitnessFormValidity();
+    });
+    
+    document.getElementById('clear-bulk-signature').addEventListener('click', () => {
+        bulkSignaturePad.clear();
+        checkBulkWitnessFormValidity();
+    });
+    
+    // Load saved signature button
+    document.getElementById('load-saved-witness-signature').addEventListener('click', () => {
+        const savedSignature = '{{ current_user.signature_data if current_user.signature_data else "" }}';
+        if (savedSignature) {
+            witnessSignaturePad.loadSignature(savedSignature);
+            checkWitnessFormValidity();
+        } else {
+            alert('No saved signature found.');
+        }
+    });
+}
+
+function createSignaturePad(canvas) {
+    const ctx = canvas.getContext('2d');
+    
+    const pad = {
+        canvas: canvas,
+        ctx: ctx,
+        drawing: false,
+        isEmpty: true,
+        
+        startDrawing: function(e) {
+            this.drawing = true;
+            this.isEmpty = false;
+            const rect = this.canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, y);
+        },
+        
+        draw: function(e) {
+            if (!this.drawing) return;
+            
+            const rect = this.canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            this.ctx.lineTo(x, y);
+            this.ctx.stroke();
+        },
+        
+        stopDrawing: function() {
+            this.drawing = false;
+        },
+        
+        clear: function() {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.isEmpty = true;
+        },
+        
+        getDataURL: function() {
+            return this.canvas.toDataURL();
+        },
+        
+        loadSignature: function(dataURL) {
+            const img = new Image();
+            img.onload = () => {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.drawImage(img, 0, 0);
+                this.isEmpty = false;
+            };
+            img.src = dataURL;
+        }
+    };
+    
+    // Set up canvas styling
+    pad.ctx.strokeStyle = '#000';
+    pad.ctx.lineWidth = 2;
+    pad.ctx.lineCap = 'round';
+    pad.ctx.lineJoin = 'round';
+    
+    // Mouse events
+    canvas.addEventListener('mousedown', (e) => pad.startDrawing(e));
+    canvas.addEventListener('mousemove', (e) => pad.draw(e));
+    canvas.addEventListener('mouseup', () => pad.stopDrawing());
+    canvas.addEventListener('mouseout', () => pad.stopDrawing());
+    
+    // Touch events
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        pad.startDrawing(e);
+    });
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        pad.draw(e);
+    });
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        pad.stopDrawing();
+    });
+    
+    return pad;
+}
+
+function witnessModal(claimId, claimerName, deviceSerial) {
+    currentClaimId = claimId;
+    
+    // Populate claim details
+    document.getElementById('claim-details').innerHTML = `
+        <div class="col-md-6">
+            <strong>Claimer:</strong><br>
+            ${claimerName}
+        </div>
+        <div class="col-md-6">
+            <strong>Device:</strong><br>
+            ${deviceSerial}
+        </div>
+    `;
+    
+    // Reset form
+    document.querySelectorAll('#witnessModal input[type="checkbox"]').forEach(cb => cb.checked = false);
+    document.getElementById('witness-notes').value = '';
+    witnessSignaturePad.clear();
+    
+    // Show modal
+    showModal('witnessModal');
+}
+
+function bulkWitnessModal() {
+    // Reset form
+    document.querySelectorAll('#bulkWitnessModal input[type="checkbox"]').forEach(cb => cb.checked = false);
+    bulkSignaturePad.clear();
+    
+    // Show modal
+    showModal('bulkWitnessModal');
+}
+
+function setupModalValidation() {
+    // Individual witness validation
+    const witnessCheckboxes = document.querySelectorAll('#witnessModal input[type="checkbox"]');
+    witnessCheckboxes.forEach(cb => {
+        cb.addEventListener('change', checkWitnessFormValidity);
+    });
+    
+    // Bulk witness validation
+    const bulkCheckboxes = document.querySelectorAll('#bulkWitnessModal input[type="checkbox"]');
+    bulkCheckboxes.forEach(cb => {
+        cb.addEventListener('change', checkBulkWitnessFormValidity);
+    });
+    
+    // Submit buttons
+    document.getElementById('submit-witness').addEventListener('click', handleWitnessSubmit);
+    document.getElementById('submit-bulk-witness').addEventListener('click', handleBulkWitnessSubmit);
+}
+
+function checkWitnessFormValidity() {
+    const checkboxes = document.querySelectorAll('#witnessModal input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    const hasSignature = !witnessSignaturePad.isEmpty;
+    
+    document.getElementById('submit-witness').disabled = !(allChecked && hasSignature);
+}
+
+function checkBulkWitnessFormValidity() {
+    const checkboxes = document.querySelectorAll('#bulkWitnessModal input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    const hasSignature = !bulkSignaturePad.isEmpty;
+    
+    document.getElementById('submit-bulk-witness').disabled = !(allChecked && hasSignature);
+}
+
+async function handleWitnessSubmit() {
+    const submitBtn = document.getElementById('submit-witness');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    
+    try {
+        const response = await fetch(`/dcr/witness_claim/${currentClaimId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                witness_signature: witnessSignaturePad.getDataURL(),
+                witness_notes: document.getElementById('witness-notes').value.trim()
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Claim witnessed successfully!');
+            location.reload();
+        } else {
+            alert('Error witnessing claim: ' + result.error);
+        }
+        
+    } catch (error) {
+        console.error('Witness error:', error);
+        alert('An error occurred while processing the witness. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+}
+
+async function handleBulkWitnessSubmit() {
+    const submitBtn = document.getElementById('submit-bulk-witness');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    
+    try {
+        const claimIds = {{ pending_claims|map(attribute='id')|list|tojson }};
+        
+        const response = await fetch('/dcr/bulk_witness_claims', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                claim_ids: claimIds,
+                witness_signature: bulkSignaturePad.getDataURL()
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(`Successfully witnessed ${result.witnessed_count} claims!`);
+            location.reload();
+        } else {
+            alert('Error in bulk witnessing: ' + result.error);
+        }
+        
+    } catch (error) {
+        console.error('Bulk witness error:', error);
+        alert('An error occurred while processing bulk witness. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+}
+
+// Check signature pads periodically for validation
+setInterval(() => {
+    checkWitnessFormValidity();
+    checkBulkWitnessFormValidity();
+}, 1000);
+</script>
+{% endblock %}

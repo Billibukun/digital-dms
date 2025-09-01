@@ -1,0 +1,390 @@
+{% extends "base.html" %}
+
+{% block title %}Super Admin Dashboard - Device Documentation Management System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-tachometer-alt text-accent mr-3"></i>
+                        Admin Dashboard
+                    </h1>
+                    <p class="text-gray-600 mt-1">Device Documentation Management System</p>
+                </div>
+                <div class="flex items-center mt-4 sm:mt-0 space-x-2">
+                    <div class="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+                    <span class="text-sm font-medium text-success">System Online</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+            <!-- Total Users Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-accent bg-opacity-10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-accent text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Users</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.total_users if stats else 0 }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ url_for('manage_users') }}" class="text-sm text-accent hover:text-blue-700 font-medium">
+                        View all users →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Total Devices Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-slate-600 bg-opacity-10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-tablet-alt text-slate-600 text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Devices</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.total_devices if stats else 0 }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ url_for('manage_devices') }}" class="text-sm text-slate-600 hover:text-slate-800 font-medium">
+                        View all devices →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Claimed Devices Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-warning bg-opacity-10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-hand-paper text-warning text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Claimed</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.claimed_devices if stats else 0 }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ url_for('manage_devices', status='claimed') }}" class="text-sm text-warning hover:text-yellow-700 font-medium">
+                        View claimed →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Distributed Devices Card -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-10 h-10 bg-success bg-opacity-10 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-check-circle text-success text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Distributed</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ stats.distributed_devices if stats else 0 }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ url_for('manage_devices', status='distributed') }}" class="text-sm text-success hover:text-green-700 font-medium">
+                        View distributed →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-bolt text-accent mr-2"></i>
+                    Quick Actions
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a href="{{ url_for('create_user') }}" 
+                       class="group flex flex-col items-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-accent hover:text-white transition-all duration-200 hover:shadow-md">
+                        <div class="w-12 h-12 bg-accent bg-opacity-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-white group-hover:bg-opacity-20">
+                            <i class="fas fa-user-plus text-accent group-hover:text-white text-lg"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900 group-hover:text-white text-center">Create User</h3>
+                        <p class="text-sm text-gray-500 group-hover:text-blue-100 text-center mt-1">Add new user</p>
+                    </a>
+
+                    <a href="{{ url_for('create_device') }}" 
+                       class="group flex flex-col items-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-slate-600 hover:text-white transition-all duration-200 hover:shadow-md">
+                        <div class="w-12 h-12 bg-slate-600 bg-opacity-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-white group-hover:bg-opacity-20">
+                            <i class="fas fa-plus-circle text-slate-600 group-hover:text-white text-lg"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900 group-hover:text-white text-center">Create Device</h3>
+                        <p class="text-sm text-gray-500 group-hover:text-slate-100 text-center mt-1">Add device</p>
+                    </a>
+
+                    <a href="{{ url_for('csv_upload') }}" 
+                       class="group flex flex-col items-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-warning hover:text-white transition-all duration-200 hover:shadow-md">
+                        <div class="w-12 h-12 bg-warning bg-opacity-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-white group-hover:bg-opacity-20">
+                            <i class="fas fa-upload text-warning group-hover:text-white text-lg"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900 group-hover:text-white text-center">Upload CSV</h3>
+                        <p class="text-sm text-gray-500 group-hover:text-yellow-100 text-center mt-1">Bulk import</p>
+                    </a>
+
+                    <a href="{{ url_for('barcode_scanner') }}" 
+                       class="group flex flex-col items-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-success hover:text-white transition-all duration-200 hover:shadow-md">
+                        <div class="w-12 h-12 bg-success bg-opacity-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-white group-hover:bg-opacity-20">
+                            <i class="fas fa-qrcode text-success group-hover:text-white text-lg"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900 group-hover:text-white text-center">Scanner</h3>
+                        <p class="text-sm text-gray-500 group-hover:text-green-100 text-center mt-1">Scan codes</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Reports -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-file-pdf text-red-600 mr-2"></i>
+                    PDF Reports & Forms
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">Download system-wide reports and manage organizational logos</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Manage Logos -->
+                    <a href="{{ url_for('manage_logos') }}" 
+                       class="group flex flex-col items-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-yellow-500 hover:text-white transition-all duration-200 hover:shadow-md">
+                        <div class="w-12 h-12 bg-yellow-500 bg-opacity-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-white group-hover:bg-opacity-20">
+                            <i class="fas fa-image text-yellow-600 group-hover:text-white text-lg"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900 group-hover:text-white text-center">Manage Logos</h3>
+                        <p class="text-sm text-gray-500 group-hover:text-yellow-100 text-center mt-1">Upload & manage</p>
+                    </a>
+
+                    <!-- State Summary Report -->
+                    <div class="group relative">
+                        <button id="state-reports-btn" 
+                                class="w-full flex flex-col items-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-blue-600 hover:text-white transition-all duration-200 hover:shadow-md">
+                            <div class="w-12 h-12 bg-blue-600 bg-opacity-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-white group-hover:bg-opacity-20">
+                                <i class="fas fa-chart-bar text-blue-600 group-hover:text-white text-lg"></i>
+                            </div>
+                            <h3 class="font-medium text-gray-900 group-hover:text-white text-center">State Reports</h3>
+                            <p class="text-sm text-gray-500 group-hover:text-blue-100 text-center mt-1">By state</p>
+                        </button>
+                        <div id="state-reports-dropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-48 overflow-y-auto">
+                            <div class="py-2">
+                                <div class="px-4 py-2 text-xs text-gray-500 border-b">Select state:</div>
+                                <!-- State links will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comprehensive Distribution -->
+                    <div class="group relative">
+                        <button id="distribution-reports-btn" 
+                                class="w-full flex flex-col items-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-green-600 hover:text-white transition-all duration-200 hover:shadow-md">
+                            <div class="w-12 h-12 bg-green-600 bg-opacity-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-white group-hover:bg-opacity-20">
+                                <i class="fas fa-list-alt text-green-600 group-hover:text-white text-lg"></i>
+                            </div>
+                            <h3 class="font-medium text-gray-900 group-hover:text-white text-center">Distribution Reports</h3>
+                            <p class="text-sm text-gray-500 group-hover:text-green-100 text-center mt-1">Comprehensive</p>
+                        </button>
+                        <div id="distribution-reports-dropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-48 overflow-y-auto">
+                            <div class="py-2">
+                                <div class="px-4 py-2 text-xs text-gray-500 border-b">Select state:</div>
+                                <!-- Distribution links will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Overview -->
+                    <a href="#" onclick="generateSystemOverview()" 
+                       class="group flex flex-col items-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-purple-600 hover:text-white transition-all duration-200 hover:shadow-md">
+                        <div class="w-12 h-12 bg-purple-600 bg-opacity-10 rounded-full flex items-center justify-center mb-3 group-hover:bg-white group-hover:bg-opacity-20">
+                            <i class="fas fa-globe text-purple-600 group-hover:text-white text-lg"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900 group-hover:text-white text-center">System Overview</h3>
+                        <p class="text-sm text-gray-500 group-hover:text-purple-100 text-center mt-1">All states</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Information -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- System Stats -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-info-circle text-accent mr-2"></i>
+                        System Information
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">States</span>
+                            <span class="font-semibold text-accent">{{ stats.total_states if stats else 0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">LGAs</span>
+                            <span class="font-semibold text-accent">{{ stats.total_lgas if stats else 0 }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Your Role</span>
+                            <span class="font-semibold text-gray-900">Super Administrator</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Access Level</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-success text-white">
+                                Full Access
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Status -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-server text-accent mr-2"></i>
+                        System Status
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Database</span>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success text-white">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full mr-1.5"></div>
+                                Online
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">API</span>
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success text-white">
+                                <div class="w-1.5 h-1.5 bg-white rounded-full mr-1.5"></div>
+                                Active
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Last Backup</span>
+                            <span class="text-sm text-gray-500">Today, 2:00 AM</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">System Version</span>
+                            <span class="text-sm text-gray-500">v1.0.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Simple fade-in animation for dashboard elements
+document.addEventListener('DOMContentLoaded', function() {
+    const elements = document.querySelectorAll('.bg-white');
+    elements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            element.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+
+    // PDF Reports dropdown functionality
+    const stateReportsBtn = document.getElementById('state-reports-btn');
+    const stateReportsDropdown = document.getElementById('state-reports-dropdown');
+    const distributionReportsBtn = document.getElementById('distribution-reports-btn');
+    const distributionReportsDropdown = document.getElementById('distribution-reports-dropdown');
+    
+    // Populate dropdowns with states
+    populateStateDropdowns();
+    
+    // Toggle dropdowns
+    if (stateReportsBtn && stateReportsDropdown) {
+        stateReportsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            distributionReportsDropdown.classList.add('hidden');
+            stateReportsDropdown.classList.toggle('hidden');
+        });
+    }
+    
+    if (distributionReportsBtn && distributionReportsDropdown) {
+        distributionReportsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            stateReportsDropdown.classList.add('hidden');
+            distributionReportsDropdown.classList.toggle('hidden');
+        });
+    }
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function() {
+        if (stateReportsDropdown) stateReportsDropdown.classList.add('hidden');
+        if (distributionReportsDropdown) distributionReportsDropdown.classList.add('hidden');
+    });
+});
+
+// Populate state dropdowns with data
+function populateStateDropdowns() {
+    // This would typically fetch from an API, but for now we'll use template data
+    // You can pass state data from the backend to populate these dropdowns
+    
+    const stateData = [
+        // These should be populated from the backend
+        // For now, we'll add placeholder functionality
+    ];
+    
+    // For actual implementation, you'd want to pass states data from the backend
+    // and populate the dropdowns dynamically
+    
+    // Example of how to populate (when you have states data):
+    // states.forEach(state => {
+    //     const stateLink = createStateLink(state);
+    //     stateReportsDropdown.appendChild(stateLink);
+    //     distributionReportsDropdown.appendChild(stateLink.cloneNode(true));
+    // });
+}
+
+// System Overview Generation
+function generateSystemOverview() {
+    // This would generate a comprehensive system overview PDF
+    // For now, we'll show an alert
+    alert('System Overview PDF generation - Feature coming soon!');
+    
+    // In the future, this would make a request to generate a system-wide PDF
+    // window.open('/admin/pdf/system_overview', '_blank');
+}
+</script>
+{% endblock %}

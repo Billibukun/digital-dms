@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Device - VERXID System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center">
+                <a href="{{ url_for('manage_devices') }}" class="text-gray-600 hover:text-gray-900 mr-4">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </a>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-tablet-alt text-accent mr-3"></i>
+                        Edit Device
+                    </h1>
+                    <p class="text-gray-600 mt-1">Update details for {{ device.serial_number }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <form method="POST" action="{{ url_for('edit_device', device_id=device.id) }}" class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Serial Number -->
+                    <div>
+                        <label for="serial_number" class="block text-sm font-medium text-gray-700">Serial Number</label>
+                        <input type="text" id="serial_number" name="serial_number" value="{{ device.serial_number }}" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm">
+                    </div>
+
+                    <!-- Device Type -->
+                    <div>
+                        <label for="device_type" class="block text-sm font-medium text-gray-700">Device Type</label>
+                        <input type="text" id="device_type" name="device_type" value="{{ device.device_type }}" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm">
+                    </div>
+
+                    <!-- IMEI 1 -->
+                    <div>
+                        <label for="imei1" class="block text-sm font-medium text-gray-700">IMEI 1</label>
+                        <input type="text" id="imei1" name="imei1" value="{{ device.imei1 }}" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm">
+                    </div>
+
+                    <!-- IMEI 2 -->
+                    <div>
+                        <label for="imei2" class="block text-sm font-medium text-gray-700">IMEI 2</label>
+                        <input type="text" id="imei2" name="imei2" value="{{ device.imei2 or '' }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm">
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                        <select id="status" name="status" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm">
+                            <option value="unclaimed" {% if device.status == 'unclaimed' %}selected{% endif %}>Unclaimed</option>
+                            <option value="claimed" {% if device.status == 'claimed' %}selected{% endif %}>Claimed</option>
+                            <option value="distributed" {% if device.status == 'distributed' %}selected{% endif %}>Distributed</option>
+                        </select>
+                    </div>
+
+                    <!-- State -->
+                    <div>
+                        <label for="state_id" class="block text-sm font-medium text-gray-700">State</label>
+                        <select id="state_id" name="state_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm">
+                            <option value="">-- Select State --</option>
+                            {% for state in states %}
+                                <option value="{{ state.id }}" {% if device.state_id == state.id %}selected{% endif %}>{{ state.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- LGA -->
+                    <div>
+                        <label for="lga_id" class="block text-sm font-medium text-gray-700">LGA</label>
+                        <select id="lga_id" name="lga_id" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent sm:text-sm">
+                            <option value="">-- Select LGA --</option>
+                            {# LGAs will be populated by JavaScript #}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pt-5">
+                    <div class="flex justify-end">
+                        <a href="{{ url_for('manage_devices') }}" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent">
+                            Cancel
+                        </a>
+                        <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-accent hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stateSelect = document.getElementById('state_id');
+    const lgaSelect = document.getElementById('lga_id');
+    const selectedStateId = '{{ device.state_id or '' }}';
+    const selectedLgaId = '{{ device.lga_id or '' }}';
+
+    function fetchLGAs(stateId, selectedLga) {
+        if (!stateId) {
+            lgaSelect.innerHTML = '<option value="">-- Select LGA --</option>';
+            return;
+        }
+        fetch(`/api/lgas/${stateId}`)
+            .then(response => response.json())
+            .then(lgas => {
+                lgaSelect.innerHTML = '<option value="">-- Select LGA --</option>';
+                lgas.forEach(lga => {
+                    const option = new Option(lga.name, lga.id);
+                    if (lga.id == selectedLga) {
+                        option.selected = true;
+                    }
+                    lgaSelect.appendChild(option);
+                });
+            });
+    }
+
+    stateSelect.addEventListener('change', function() {
+        fetchLGAs(this.value, null);
+    });
+
+    if (selectedStateId) {
+        fetchLGAs(selectedStateId, selectedLgaId);
+    }
+});
+</script>
+{% endblock %}

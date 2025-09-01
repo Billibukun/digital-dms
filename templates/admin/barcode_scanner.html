@@ -1,0 +1,602 @@
+{% extends "base.html" %}
+
+{% block title %}Barcode Scanner - Device Documentation Management System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center">
+                <a href="{{ url_for('dashboard') }}" 
+                   class="bg-gray-100 text-gray-700 p-2 rounded-lg hover:bg-gray-200 transition-colors duration-200 mr-4">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-qrcode text-accent mr-3"></i>
+                        Barcode Scanner
+                    </h1>
+                    <p class="text-gray-600 mt-1">Scan device barcodes and IMEI numbers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Scanner Section -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-camera text-accent mr-2"></i>
+                        Camera Scanner
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <!-- Video Container -->
+                    <div class="relative mb-6">
+                        <video id="video" 
+                               class="w-full h-64 bg-gray-100 rounded-lg border-2 border-gray-200 object-cover"
+                               autoplay muted playsinline>
+                        </video>
+                        <canvas id="canvas" class="hidden"></canvas>
+                        
+                        <!-- Overlay for scanning feedback -->
+                        <div id="scan-overlay" class="absolute inset-0 border-2 border-accent rounded-lg opacity-0 transition-opacity duration-200">
+                            <div class="absolute inset-4 border border-accent border-dashed rounded"></div>
+                        </div>
+                    </div>
+
+                    <!-- Scanner Controls -->
+                    <div class="space-y-4">
+                        <!-- Location Selection -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="state_select" class="block text-sm font-medium text-gray-700 mb-1">
+                                    State
+                                </label>
+                                <select id="state_select" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                                    <option value="">Select State</option>
+                                    <!-- States will be populated here -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="lga_select" class="block text-sm font-medium text-gray-700 mb-1">
+                                    LGA
+                                </label>
+                                <select id="lga_select" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                                        disabled>
+                                    <option value="">Select LGA</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex flex-wrap gap-2 justify-center">
+                            <button id="start-scan" 
+                                    class="bg-success text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200 flex items-center">
+                                <i class="fas fa-play mr-2"></i>
+                                Start Scanning
+                            </button>
+                            <button id="stop-scan" 
+                                    class="bg-danger text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200 hidden flex items-center">
+                                <i class="fas fa-stop mr-2"></i>
+                                Stop Scanning
+                            </button>
+                            <button id="manual-entry" 
+                                    class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center">
+                                <i class="fas fa-keyboard mr-2"></i>
+                                Manual Entry
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scanned Results Section -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-list text-accent mr-2"></i>
+                        Scanned Items
+                    </h2>
+                    <span id="barcode-count" class="bg-accent text-white px-2 py-1 rounded-full text-sm font-medium">0</span>
+                </div>
+                <div class="p-6">
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="text-center p-3 bg-success bg-opacity-10 rounded-lg">
+                            <div id="successful-scans" class="text-2xl font-bold text-success">0</div>
+                            <div class="text-sm text-gray-600">Successful</div>
+                        </div>
+                        <div class="text-center p-3 bg-warning bg-opacity-10 rounded-lg">
+                            <div id="duplicate-scans" class="text-2xl font-bold text-warning">0</div>
+                            <div class="text-sm text-gray-600">Duplicates</div>
+                        </div>
+                        <div class="text-center p-3 bg-danger bg-opacity-10 rounded-lg">
+                            <div id="error-scans" class="text-2xl font-bold text-danger">0</div>
+                            <div class="text-sm text-gray-600">Errors</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Scanned Items List -->
+                    <div id="barcode-list" class="space-y-2 max-h-64 overflow-y-auto mb-6">
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-qrcode text-4xl mb-3 opacity-50"></i>
+                            <p>No items scanned yet</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="space-y-2">
+                        <button id="process-barcodes" 
+                                class="w-full bg-accent text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled>
+                            <i class="fas fa-upload mr-2"></i>
+                            Process Scanned Items
+                        </button>
+                        <button id="clear-barcodes" 
+                                class="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-trash mr-2"></i>
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Manual Entry Modal -->
+<div id="manualEntryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Manual Entry</h3>
+        </div>
+        <div class="p-6">
+            <form id="manual-entry-form" class="space-y-4">
+                <div>
+                    <label for="manual-imei1" class="block text-sm font-medium text-gray-700 mb-1">
+                        IMEI 1 *
+                    </label>
+                    <input type="text" id="manual-imei1" maxlength="15"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent font-mono"
+                           placeholder="123456789012345">
+                    <p class="text-xs text-gray-500 mt-1">15-digit IMEI number</p>
+                </div>
+                <div>
+                    <label for="manual-imei2" class="block text-sm font-medium text-gray-700 mb-1">
+                        IMEI 2 (Optional)
+                    </label>
+                    <input type="text" id="manual-imei2" maxlength="15"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent font-mono"
+                           placeholder="123456789012346">
+                </div>
+                <div>
+                    <label for="manual-serial" class="block text-sm font-medium text-gray-700 mb-1">
+                        Serial Number (Optional)
+                    </label>
+                    <input type="text" id="manual-serial" maxlength="15"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                           placeholder="RT7TITAN0012345">
+                    <p class="text-xs text-gray-500 mt-1">15-character serial number</p>
+                </div>
+            </form>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end space-x-3">
+            <button id="cancel-manual" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                Cancel
+            </button>
+            <button id="add-manual-entry" class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-blue-600 transition-colors duration-200">
+                Add Device
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- ZXing Barcode Scanner Library -->
+<script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+
+<script>
+class ModernBarcodeScanner {
+    constructor() {
+        this.codeReader = new ZXing.BrowserMultiFormatReader();
+        this.scanning = false;
+        this.scannedItems = new Set();
+        this.itemData = [];
+        this.stats = { successful: 0, duplicates: 0, errors: 0 };
+        
+        this.initializeElements();
+        this.bindEvents();
+        this.loadStates();
+    }
+    
+    initializeElements() {
+        this.video = document.getElementById('video');
+        this.canvas = document.getElementById('canvas');
+        this.startBtn = document.getElementById('start-scan');
+        this.stopBtn = document.getElementById('stop-scan');
+        this.manualBtn = document.getElementById('manual-entry');
+        this.processBtn = document.getElementById('process-barcodes');
+        this.clearBtn = document.getElementById('clear-barcodes');
+        this.itemList = document.getElementById('barcode-list');
+        this.itemCount = document.getElementById('barcode-count');
+        this.scanOverlay = document.getElementById('scan-overlay');
+        this.stateSelect = document.getElementById('state_select');
+        this.lgaSelect = document.getElementById('lga_select');
+        this.modal = document.getElementById('manualEntryModal');
+    }
+    
+    bindEvents() {
+        this.startBtn.addEventListener('click', () => this.startScanning());
+        this.stopBtn.addEventListener('click', () => this.stopScanning());
+        this.manualBtn.addEventListener('click', () => this.showManualEntry());
+        this.processBtn.addEventListener('click', () => this.processItems());
+        this.clearBtn.addEventListener('click', () => this.clearItems());
+        
+        this.stateSelect.addEventListener('change', (e) => this.loadLGAs(e.target.value));
+        
+        document.getElementById('add-manual-entry').addEventListener('click', () => this.addManualEntry());
+        document.getElementById('cancel-manual').addEventListener('click', () => this.hideManualEntry());
+        
+        // Close modal on outside click
+        this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) this.hideManualEntry();
+        });
+    }
+    
+    async loadStates() {
+        try {
+            const response = await fetch('/api/states');
+            const states = await response.json();
+            
+            this.stateSelect.innerHTML = '<option value="">Select State</option>';
+            states.forEach(state => {
+                const option = document.createElement('option');
+                option.value = state.id;
+                option.textContent = state.name;
+                option.dataset.code = state.code;
+                this.stateSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading states:', error);
+        }
+    }
+    
+    async loadLGAs(stateId) {
+        this.lgaSelect.innerHTML = '<option value="">Select LGA</option>';
+        this.lgaSelect.disabled = !stateId;
+        
+        if (!stateId) return;
+        
+        try {
+            const response = await fetch(`/api/lgas/${stateId}`);
+            const lgas = await response.json();
+            
+            lgas.forEach(lga => {
+                const option = document.createElement('option');
+                option.value = lga.id;
+                option.textContent = lga.name;
+                this.lgaSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading LGAs:', error);
+        }
+    }
+    
+    async startScanning() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
+            
+            this.video.srcObject = stream;
+            this.scanning = true;
+            
+            this.startBtn.classList.add('hidden');
+            this.stopBtn.classList.remove('hidden');
+            this.scanOverlay.classList.add('opacity-100');
+            
+            this.codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
+                if (result && this.scanning) {
+                    this.handleScanResult(result.text);
+                }
+            });
+            
+        } catch (error) {
+            console.error('Camera error:', error);
+            this.showToast('Camera access denied. Please allow camera permissions.', 'error');
+        }
+    }
+    
+    stopScanning() {
+        this.scanning = false;
+        this.codeReader.reset();
+        
+        if (this.video.srcObject) {
+            this.video.srcObject.getTracks().forEach(track => track.stop());
+            this.video.srcObject = null;
+        }
+        
+        this.startBtn.classList.remove('hidden');
+        this.stopBtn.classList.add('hidden');
+        this.scanOverlay.classList.remove('opacity-100');
+    }
+    
+    handleScanResult(scannedText) {
+        if (this.scannedItems.has(scannedText)) {
+            this.stats.duplicates++;
+            this.updateStats();
+            this.showToast('Duplicate item detected', 'warning');
+            return;
+        }
+        
+        if (this.validateScannedData(scannedText)) {
+            this.scannedItems.add(scannedText);
+            this.itemData.push({
+                data: scannedText,
+                timestamp: new Date().toISOString(),
+                type: this.detectDataType(scannedText),
+                method: 'Scanned'
+            });
+            
+            this.stats.successful++;
+            this.updateDisplay();
+            this.showToast('Item scanned successfully!', 'success');
+            
+            // Brief flash effect
+            this.scanOverlay.classList.add('bg-success', 'bg-opacity-20');
+            setTimeout(() => {
+                this.scanOverlay.classList.remove('bg-success', 'bg-opacity-20');
+            }, 200);
+            
+        } else {
+            this.stats.errors++;
+            this.updateStats();
+            this.showToast('Invalid format detected', 'error');
+        }
+    }
+    
+    validateScannedData(data) {
+        // IMEI: exactly 15 digits
+        // Serial: exactly 15 characters (alphanumeric)
+        const imeiPattern = /^\d{15}$/;
+        const serialPattern = /^[A-Za-z0-9]{15}$/;
+        
+        return imeiPattern.test(data) || serialPattern.test(data);
+    }
+    
+    detectDataType(data) {
+        if (/^\d{15}$/.test(data)) {
+            return 'IMEI';
+        } else if (/^[A-Za-z0-9]{15}$/.test(data)) {
+            return 'Serial Number';
+        }
+        return 'Unknown';
+    }
+    
+    updateDisplay() {
+        this.updateStats();
+        this.renderItemList();
+        this.itemCount.textContent = this.itemData.length;
+        this.processBtn.disabled = this.itemData.length === 0;
+    }
+    
+    updateStats() {
+        document.getElementById('successful-scans').textContent = this.stats.successful;
+        document.getElementById('duplicate-scans').textContent = this.stats.duplicates;
+        document.getElementById('error-scans').textContent = this.stats.errors;
+    }
+    
+    renderItemList() {
+        if (this.itemData.length === 0) {
+            this.itemList.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i class="fas fa-qrcode text-4xl mb-3 opacity-50"></i>
+                    <p>No items scanned yet</p>
+                </div>
+            `;
+            return;
+        }
+        
+        this.itemList.innerHTML = this.itemData.map((item, index) => `
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="flex-1">
+                    <div class="font-mono font-medium text-gray-900">${item.data}</div>
+                    <div class="flex items-center space-x-2 mt-1">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                            item.type === 'IMEI' ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700'
+                        }">${item.type}</span>
+                        <span class="text-xs text-gray-500">${item.method}</span>
+                        <span class="text-xs text-gray-500">${new Date(item.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                </div>
+                <button onclick="scanner.removeItem(${index})" 
+                        class="ml-3 text-gray-400 hover:text-red-500 transition-colors duration-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `).join('');
+    }
+    
+    removeItem(index) {
+        const removed = this.itemData[index];
+        this.itemData.splice(index, 1);
+        this.scannedItems.delete(removed.data);
+        this.stats.successful--;
+        this.updateDisplay();
+        this.showToast('Item removed', 'info');
+    }
+    
+    showManualEntry() {
+        this.modal.classList.remove('hidden');
+        document.getElementById('manual-imei1').focus();
+    }
+    
+    hideManualEntry() {
+        this.modal.classList.add('hidden');
+        document.getElementById('manual-entry-form').reset();
+    }
+    
+    addManualEntry() {
+        const imei1 = document.getElementById('manual-imei1').value.trim();
+        const imei2 = document.getElementById('manual-imei2').value.trim();
+        const serial = document.getElementById('manual-serial').value.trim();
+        
+        if (!imei1) {
+            this.showToast('IMEI 1 is required', 'error');
+            return;
+        }
+        
+        if (!this.validateScannedData(imei1)) {
+            this.showToast('Invalid IMEI 1 format (must be 15 digits)', 'error');
+            return;
+        }
+        
+        if (this.scannedItems.has(imei1)) {
+            this.showToast('IMEI 1 already exists', 'error');
+            return;
+        }
+        
+        const itemsToAdd = [];
+        
+        // Add IMEI 1
+        itemsToAdd.push({
+            data: imei1,
+            type: 'IMEI',
+            method: 'Manual'
+        });
+        
+        // Add IMEI 2 if provided and valid
+        if (imei2) {
+            if (!this.validateScannedData(imei2)) {
+                this.showToast('Invalid IMEI 2 format (must be 15 digits)', 'error');
+                return;
+            }
+            if (!this.scannedItems.has(imei2)) {
+                itemsToAdd.push({
+                    data: imei2,
+                    type: 'IMEI',
+                    method: 'Manual'
+                });
+            }
+        }
+        
+        // Add Serial if provided and valid
+        if (serial) {
+            if (!this.validateScannedData(serial)) {
+                this.showToast('Invalid serial format (must be 15 characters)', 'error');
+                return;
+            }
+            if (!this.scannedItems.has(serial)) {
+                itemsToAdd.push({
+                    data: serial,
+                    type: 'Serial Number',
+                    method: 'Manual'
+                });
+            }
+        }
+        
+        // Add all items
+        itemsToAdd.forEach(item => {
+            this.scannedItems.add(item.data);
+            this.itemData.push({
+                ...item,
+                timestamp: new Date().toISOString()
+            });
+        });
+        
+        this.stats.successful += itemsToAdd.length;
+        this.updateDisplay();
+        this.hideManualEntry();
+        this.showToast(`${itemsToAdd.length} item(s) added successfully`, 'success');
+    }
+    
+    async processItems() {
+        if (this.itemData.length === 0) {
+            this.showToast('No items to process', 'error');
+            return;
+        }
+        
+        const stateId = this.stateSelect.value;
+        const lgaId = this.lgaSelect.value;
+        
+        if (!stateId) {
+            this.showToast('Please select a state', 'error');
+            return;
+        }
+        
+        this.processBtn.disabled = true;
+        this.processBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>Processing...';
+        
+        try {
+            const response = await fetch('/admin/process_scanned_items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items: this.itemData,
+                    state_id: stateId,
+                    lga_id: lgaId
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this.showToast(`Successfully processed ${result.processed} items`, 'success');
+                this.clearItems();
+            } else {
+                this.showToast(result.error || 'Processing failed', 'error');
+            }
+            
+        } catch (error) {
+            console.error('Processing error:', error);
+            this.showToast('Processing failed. Please try again.', 'error');
+        } finally {
+            this.processBtn.disabled = false;
+            this.processBtn.innerHTML = '<i class="fas fa-upload mr-2"></i>Process Scanned Items';
+        }
+    }
+    
+    clearItems() {
+        this.itemData = [];
+        this.scannedItems.clear();
+        this.stats = { successful: 0, duplicates: 0, errors: 0 };
+        this.updateDisplay();
+        this.showToast('All items cleared', 'info');
+    }
+    
+    showToast(message, type) {
+        const colors = {
+            success: 'bg-success text-white',
+            error: 'bg-danger text-white',
+            warning: 'bg-warning text-white',
+            info: 'bg-accent text-white'
+        };
+        
+        const toast = document.createElement('div');
+        toast.className = `fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${colors[type] || colors.info}`;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.remove(), 3000);
+    }
+}
+
+// Initialize scanner when page loads
+let scanner;
+document.addEventListener('DOMContentLoaded', function() {
+    scanner = new ModernBarcodeScanner();
+});
+</script>
+{% endblock %}

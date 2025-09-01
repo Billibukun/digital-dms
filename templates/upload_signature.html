@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Signature - DDMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .signature-preview {
+        max-width: 300px;
+        max-height: 150px;
+        border: 2px dashed #cbd5e0;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        background-color: #f7fafc;
+    }
+    
+    .signature-preview img {
+        max-width: 100%;
+        max-height: 100px;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        background-color: white;
+        padding: 10px;
+    }
+    
+    .upload-area {
+        border: 2px dashed #cbd5e0;
+        border-radius: 8px;
+        padding: 40px;
+        text-align: center;
+        background-color: #f7fafc;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .upload-area:hover {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
+    }
+    
+    .upload-area.dragover {
+        border-color: #2563eb;
+        background-color: #dbeafe;
+    }
+    
+    .file-input {
+        display: none;
+    }
+    
+    .status-message {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+    
+    .status-success {
+        background-color: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+    
+    .status-error {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="bg-white border-b border-gray-200 rounded-t-lg">
+            <div class="px-6 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="p-3 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl shadow-lg">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-900">Signature Management</h1>
+                            <p class="text-gray-600 mt-1">Upload and manage your digital signature for official documents</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white shadow-sm border-x border-b border-gray-200 rounded-b-lg">
+            <div class="p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Current Signature -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Signature</h3>
+                        <div class="signature-preview" id="current-signature">
+                            <div id="signature-placeholder">
+                                <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                </svg>
+                                <p class="text-gray-500 text-sm">No signature uploaded</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4" id="signature-actions" style="display: none;">
+                            <button id="delete-signature" class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                                Delete Signature
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Upload New Signature -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Upload New Signature</h3>
+                        <div class="upload-area" id="upload-area">
+                            <input type="file" id="signature-file" class="file-input" accept="image/png,image/jpg,image/jpeg,image/gif">
+                            <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                            <h4 class="text-lg font-medium text-gray-700 mb-2">Click to upload or drag and drop</h4>
+                            <p class="text-sm text-gray-500 mb-2">PNG, JPG, JPEG, or GIF files only</p>
+                            <p class="text-xs text-gray-400">Maximum file size: 2MB</p>
+                        </div>
+                        
+                        <div id="status-message" class="status-message" style="display: none;"></div>
+                        
+                        <div class="mt-4">
+                            <button id="upload-btn" class="inline-flex items-center px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" disabled>
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                                <span id="upload-btn-text">Upload Signature</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+                    <h4 class="text-lg font-medium text-blue-900 mb-3">Signature Guidelines</h4>
+                    <ul class="text-sm text-blue-800 space-y-2">
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Use a clear, high-contrast signature on a white or transparent background</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Ensure the signature is legible and matches your official signature</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Recommended dimensions: 300x150 pixels or similar aspect ratio</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-4 h-4 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>This signature will be used in all official PDF documents you generate</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('signature-file');
+    const uploadBtn = document.getElementById('upload-btn');
+    const uploadBtnText = document.getElementById('upload-btn-text');
+    const statusMessage = document.getElementById('status-message');
+    const currentSignature = document.getElementById('current-signature');
+    const signaturePlaceholder = document.getElementById('signature-placeholder');
+    const signatureActions = document.getElementById('signature-actions');
+    const deleteBtn = document.getElementById('delete-signature');
+
+    // Load current signature on page load
+    loadCurrentSignature();
+
+    // Handle file input change
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            enableUploadButton();
+        }
+    });
+
+    // Handle drag and drop
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            enableUploadButton();
+        }
+    });
+
+    // Handle click on upload area
+    uploadArea.addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    // Handle upload button click
+    uploadBtn.addEventListener('click', function() {
+        if (fileInput.files.length > 0) {
+            uploadSignature();
+        }
+    });
+
+    // Handle delete button click
+    deleteBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete your signature? This action cannot be undone.')) {
+            deleteSignature();
+        }
+    });
+
+    function enableUploadButton() {
+        uploadBtn.disabled = false;
+        uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
+    function disableUploadButton() {
+        uploadBtn.disabled = true;
+        uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+
+    function showStatus(message, isError = false) {
+        statusMessage.textContent = message;
+        statusMessage.className = `status-message ${isError ? 'status-error' : 'status-success'}`;
+        statusMessage.style.display = 'block';
+        
+        // Hide after 5 seconds
+        setTimeout(() => {
+            statusMessage.style.display = 'none';
+        }, 5000);
+    }
+
+    function loadCurrentSignature() {
+        fetch('/api/get_user_signature')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.signature_data) {
+                    displaySignature(data.signature_data);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading signature:', error);
+            });
+    }
+
+    function displaySignature(signatureData) {
+        const img = document.createElement('img');
+        img.src = 'data:image/png;base64,' + signatureData;
+        img.alt = 'Current Signature';
+        
+        signaturePlaceholder.style.display = 'none';
+        currentSignature.innerHTML = '';
+        currentSignature.appendChild(img);
+        signatureActions.style.display = 'block';
+    }
+
+    function uploadSignature() {
+        const formData = new FormData();
+        formData.append('signature', fileInput.files[0]);
+
+        uploadBtnText.textContent = 'Uploading...';
+        disableUploadButton();
+
+        fetch('/api/upload_signature', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showStatus(data.message);
+                displaySignature(data.signature_data);
+                fileInput.value = '';
+            } else {
+                showStatus(data.error || 'Upload failed', true);
+            }
+        })
+        .catch(error => {
+            console.error('Upload error:', error);
+            showStatus('Upload failed. Please try again.', true);
+        })
+        .finally(() => {
+            uploadBtnText.textContent = 'Upload Signature';
+            disableUploadButton();
+        });
+    }
+
+    function deleteSignature() {
+        fetch('/api/delete_signature', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showStatus(data.message);
+                // Reset to placeholder
+                currentSignature.innerHTML = '';
+                currentSignature.appendChild(signaturePlaceholder);
+                signaturePlaceholder.style.display = 'block';
+                signatureActions.style.display = 'none';
+            } else {
+                showStatus(data.error || 'Delete failed', true);
+            }
+        })
+        .catch(error => {
+            console.error('Delete error:', error);
+            showStatus('Delete failed. Please try again.', true);
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Login - VERXID System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-green-50 relative overflow-hidden">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-5">
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, #059669 1px, transparent 0); background-size: 32px 32px;"></div>
+    </div>
+    
+    <div class="flex min-h-screen">
+        <!-- Left Side - Branding -->
+        <div class="hidden lg:flex lg:w-1/2 relative">
+            <div class="w-full bg-gradient-to-br from-green-700 to-green-900 flex items-center justify-center relative">
+                <!-- Decorative Elements -->
+                <div class="absolute top-10 left-10 w-20 h-20 bg-green-500/20 rounded-full animate-pulse"></div>
+                <div class="absolute bottom-20 right-20 w-16 h-16 bg-green-300/20 rounded-full animate-bounce"></div>
+                <div class="absolute top-1/3 right-10 w-12 h-12 bg-green-400/20 rounded-full"></div>
+                
+                <div class="text-center z-10 px-12">
+                    <div class="mb-8">
+                        <div class="inline-flex items-center justify-center w-24 h-24 mb-6 bg-white/10 backdrop-blur-sm rounded-3xl shadow-2xl">
+                            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <h1 class="text-5xl font-bold text-white mb-4 tracking-tight">VERXID</h1>
+                        <p class="text-xl text-green-100 mb-8 font-light">Digital Device Management Platform</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start text-left">
+                            <div class="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white mb-1">Secure & Reliable</h3>
+                                <p class="text-green-200 text-sm leading-relaxed">Advanced security protocols protect your data with enterprise-grade encryption.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start text-left">
+                            <div class="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white mb-1">Lightning Fast</h3>
+                                <p class="text-green-200 text-sm leading-relaxed">Optimized performance for seamless device management workflows.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start text-left">
+                            <div class="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white mb-1">Mobile Ready</h3>
+                                <p class="text-green-200 text-sm leading-relaxed">Access your dashboard anywhere, anytime, on any device.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="absolute bottom-8 left-8 right-8 text-center">
+                    <p class="text-green-300 text-sm font-light">Powered by Atdata Druid Services Limited</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Login Form -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8 relative z-10">
+            <div class="w-full max-w-md">
+                
+                <!-- Mobile Logo (shown only on small screens) -->
+                <div class="lg:hidden text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 mb-4 bg-gradient-to-r from-green-600 to-green-700 rounded-2xl shadow-lg">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">VERXID System</h1>
+                    <p class="text-gray-600">Digital Device Management Platform</p>
+                </div>
+
+                <!-- Login Card -->
+                <div class="bg-white/70 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 p-8 relative">
+                    <!-- Glassmorphism effect -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-white/80 to-white/40 rounded-3xl"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="text-center mb-8">
+                            <h2 class="text-3xl font-bold bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent mb-3">
+                                Welcome Back
+                            </h2>
+                            <p class="text-gray-600 font-medium">Sign in to access your dashboard</p>
+                        </div>
+
+                        <!-- Error Messages -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                <div class="mb-6 space-y-2">
+                                    {% for category, message in messages %}
+                                        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0">
+                                                    <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                                    </svg>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm text-red-700 font-medium">{{ message }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" action="{{ url_for('login') }}" class="space-y-6">
+                            <!-- Email Field -->
+                            <div>
+                                <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400 group-focus-within:text-green-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
+                                        </svg>
+                                    </div>
+                                    <input id="email" name="email" type="email" required 
+                                           class="block w-full pl-12 pr-4 py-4 bg-gray-50/80 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white/90 transition-all duration-200 text-base"
+                                           placeholder="Enter your email address">
+                                </div>
+                            </div>
+                            
+                            <!-- Password Field -->
+                            <div>
+                                <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                                <div class="relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400 group-focus-within:text-green-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                    </div>
+                                    <input id="password" name="password" type="password" required 
+                                           class="block w-full pl-12 pr-4 py-4 bg-gray-50/80 border border-gray-200 rounded-2xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent focus:bg-white/90 transition-all duration-200 text-base"
+                                           placeholder="Enter your password">
+                                </div>
+                            </div>
+                            
+                            <!-- Sign In Button -->
+                            <button type="submit" 
+                                    class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold py-4 px-6 rounded-2xl hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-500/20 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl group">
+                                <div class="flex items-center justify-center">
+                                    <svg class="w-5 h-5 mr-2 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                                    </svg>
+                                    Sign In to Dashboard
+                                </div>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="lg:hidden text-center mt-8 text-sm text-gray-500">
+                    <p>Powered by Atdata Druid Services Limited</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

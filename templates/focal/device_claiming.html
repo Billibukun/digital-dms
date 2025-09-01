@@ -1,0 +1,730 @@
+{% extends "base.html" %}
+
+{% block title %}Claim Device - VERXID System{% endblock %}
+
+{% block extra_css %}
+<style>
+.signature-pad {
+    border: 2px dashed #dee2e6;
+    border-radius: 0.375rem;
+    cursor: crosshair;
+    background: #fff;
+}
+
+.signature-pad:hover {
+    border-color: #0d6efd;
+    background: #f8f9ff;
+}
+
+.signature-controls {
+    margin-top: 0.5rem;
+}
+
+.device-info-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.checklist-item {
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.checklist-item:hover {
+    background-color: #f8f9fa;
+}
+
+.checklist-item.completed {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+}
+
+.step::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #dee2e6;
+    z-index: -1;
+}
+
+.step:last-child::after {
+    display: none;
+}
+
+.step.active .step-number {
+    background: #0d6efd;
+    color: white;
+}
+
+.step.completed .step-number {
+    background: #198754;
+    color: white;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #dee2e6;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{{ url_for('algon_dashboard') }}" class="btn btn-outline-secondary me-3">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h2><i class="fas fa-hand-paper me-2"></i>Claim Device</h2>
+        </div>
+    </div>
+</div>
+
+<div class="step-indicator">
+    <div class="step active" id="step-1">
+        <div class="step-number">1</div>
+        <small>Device Info</small>
+    </div>
+    <div class="step" id="step-2">
+        <div class="step-number">2</div>
+        <small>Testing</small>
+    </div>
+    <div class="step" id="step-3">
+        <div class="step-number">3</div>
+        <small>Verification</small>
+    </div>
+    <div class="step" id="step-4">
+        <div class="step-number">4</div>
+        <small>Signature</small>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card device-info-card text-white">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-tablet-alt me-2"></i>Device Information
+                </h5>
+                <div class="mb-3">
+                    <strong>Device Type:</strong><br>
+                    {{ device.device_type }}
+                </div>
+                <div class="mb-3">
+                    <strong>Model:</strong><br>
+                    {{ device.model or 'VERXID Tablet' }}
+                </div>
+                <div class="mb-3">
+                    <strong>IMEI 1:</strong><br>
+                    <code class="text-white">{{ device.imei1 }}</code>
+                </div>
+                {% if device.imei2 %}
+                <div class="mb-3">
+                    <strong>IMEI 2:</strong><br>
+                    <code class="text-white">{{ device.imei2 }}</code>
+                </div>
+                {% endif %}
+                <div class="mb-3">
+                    <strong>Carton Number:</strong><br>
+                    {{ device.carton_number or 'N/A' }}
+                </div>
+                <div class="mb-3">
+                    <strong>Status:</strong><br>
+                    <span class="badge bg-light text-dark">{{ device.status.title() }}</span>
+                </div>
+            </div>
+        </div>
+        
+        {% if dcr_witness %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="fas fa-eye me-2"></i>DCR Witness</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <strong>{{ dcr_witness.full_name }}</strong>
+                </div>
+                <div class="mb-2">
+                    <small class="text-muted">{{ dcr_witness.organization }}</small>
+                </div>
+                <div class="text-muted">
+                    <i class="fas fa-phone me-1"></i>{{ dcr_witness.phone or 'No phone' }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form id="claim-form">
+                    <!-- Step 1: Device Information -->
+                    <div class="step-content active" id="content-1">
+                        <h5 class="mb-4">Step 1: Device Information & Serial Number</h5>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Please enter the serial number found on the device after physical inspection.
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="serial_number" class="form-label">Serial Number *</label>
+                            <input type="text" class="form-control form-control-lg" id="serial_number" 
+                                   placeholder="Enter device serial number" required
+                                   value="{{ device.serial_number or '' }}">
+                            <div class="form-text">The serial number should be printed on the device label or back panel</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                                Next: Device Testing <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Testing -->
+                    <div class="step-content" id="content-2">
+                        <h5 class="mb-4">Step 2: Device Testing</h5>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Please test all device functions before proceeding. Check all items below once completed.
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="test-power">
+                                        <label class="form-check-label" for="test-power">
+                                            <strong>Power On/Off Test</strong><br>
+                                            <small class="text-muted">Device boots up and shuts down properly</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="test-screen">
+                                        <label class="form-check-label" for="test-screen">
+                                            <strong>Screen & Touch Test</strong><br>
+                                            <small class="text-muted">Screen displays correctly and responds to touch</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="test-connectivity">
+                                        <label class="form-check-label" for="test-connectivity">
+                                            <strong>Connectivity Test</strong><br>
+                                            <small class="text-muted">WiFi, Bluetooth, and cellular connections work</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="test-apps">
+                                        <label class="form-check-label" for="test-apps">
+                                            <strong>Applications Test</strong><br>
+                                            <small class="text-muted">Pre-installed apps launch and function correctly</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="test-accessories">
+                                        <label class="form-check-label" for="test-accessories">
+                                            <strong>Accessories Check</strong><br>
+                                            <small class="text-muted">Charger, cables, and other accessories are present</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="test-battery">
+                                        <label class="form-check-label" for="test-battery">
+                                            <strong>Battery Test</strong><br>
+                                            <small class="text-muted">Battery charges and holds charge properly</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="testing_notes" class="form-label">Testing Notes (Optional)</label>
+                            <textarea class="form-control" id="testing_notes" rows="3" 
+                                      placeholder="Any issues or observations during testing..."></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary" onclick="previousStep(1)">
+                                <i class="fas fa-arrow-left me-2"></i>Previous
+                            </button>
+                            <button type="button" class="btn btn-primary" id="testing-next" disabled onclick="nextStep(3)">
+                                Next: Verification <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Verification -->
+                    <div class="step-content" id="content-3">
+                        <h5 class="mb-4">Step 3: Device Verification</h5>
+                        
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Please verify that the device meets all requirements and is ready for distribution.
+                        </div>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="verify-condition">
+                                        <label class="form-check-label" for="verify-condition">
+                                            <strong>Physical Condition</strong><br>
+                                            <small class="text-muted">Device is in good physical condition with no damage</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="verify-functionality">
+                                        <label class="form-check-label" for="verify-functionality">
+                                            <strong>Full Functionality</strong><br>
+                                            <small class="text-muted">All tested functions work as expected</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="verify-accessories">
+                                        <label class="form-check-label" for="verify-accessories">
+                                            <strong>Complete Accessories</strong><br>
+                                            <small class="text-muted">All required accessories are included and functional</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="checklist-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="verify-ready">
+                                        <label class="form-check-label" for="verify-ready">
+                                            <strong>Distribution Ready</strong><br>
+                                            <small class="text-muted">Device is ready for distribution to ward officers</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="verification_notes" class="form-label">Verification Notes (Optional)</label>
+                            <textarea class="form-control" id="verification_notes" rows="3" 
+                                      placeholder="Any additional comments or observations..."></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary" onclick="previousStep(2)">
+                                <i class="fas fa-arrow-left me-2"></i>Previous
+                            </button>
+                            <button type="button" class="btn btn-primary" id="verification-next" disabled onclick="nextStep(4)">
+                                Next: Digital Signature <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4: Digital Signature -->
+                    <div class="step-content" id="content-4">
+                        <h5 class="mb-4">Step 4: Digital Signature</h5>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-signature me-2"></i>
+                            Please sign below to confirm that you have claimed this device and completed all testing and verification procedures.
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Your Digital Signature *</label>
+                            <div class="signature-container">
+                                <canvas id="signature-pad" class="signature-pad" width="600" height="200"></canvas>
+                                <div class="signature-controls">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-signature">
+                                        <i class="fas fa-eraser me-1"></i>Clear
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="load-saved-signature">
+                                        <i class="fas fa-download me-1"></i>Use Saved Signature
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-text">Draw your signature above using mouse or touch</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="confirm-claim" required>
+                                <label class="form-check-label" for="confirm-claim">
+                                    I confirm that I have received, tested, and verified this device. I acknowledge responsibility for its proper handling and distribution.
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary" onclick="previousStep(3)">
+                                <i class="fas fa-arrow-left me-2"></i>Previous
+                            </button>
+                            <button type="submit" class="btn btn-success" id="submit-claim" disabled>
+                                <i class="fas fa-hand-paper me-2"></i>Complete Claim
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentStep = 1;
+let signaturePad;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize signature pad
+    const canvas = document.getElementById('signature-pad');
+    const ctx = canvas.getContext('2d');
+    
+    // Set up signature pad
+    signaturePad = {
+        canvas: canvas,
+        ctx: ctx,
+        drawing: false,
+        isEmpty: true,
+        
+        startDrawing: function(e) {
+            this.drawing = true;
+            this.isEmpty = false;
+            const rect = this.canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, y);
+        },
+        
+        draw: function(e) {
+            if (!this.drawing) return;
+            
+            const rect = this.canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            
+            this.ctx.lineTo(x, y);
+            this.ctx.stroke();
+        },
+        
+        stopDrawing: function() {
+            this.drawing = false;
+        },
+        
+        clear: function() {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.isEmpty = true;
+            checkStep4Completion();
+        },
+        
+        getDataURL: function() {
+            return this.canvas.toDataURL();
+        },
+        
+        loadSignature: function(dataURL) {
+            const img = new Image();
+            img.onload = () => {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.drawImage(img, 0, 0);
+                this.isEmpty = false;
+                checkStep4Completion();
+            };
+            img.src = dataURL;
+        }
+    };
+    
+    // Set up canvas styling
+    signaturePad.ctx.strokeStyle = '#000';
+    signaturePad.ctx.lineWidth = 2;
+    signaturePad.ctx.lineCap = 'round';
+    signaturePad.ctx.lineJoin = 'round';
+    
+    // Mouse events
+    canvas.addEventListener('mousedown', (e) => signaturePad.startDrawing(e));
+    canvas.addEventListener('mousemove', (e) => signaturePad.draw(e));
+    canvas.addEventListener('mouseup', () => signaturePad.stopDrawing());
+    canvas.addEventListener('mouseout', () => signaturePad.stopDrawing());
+    
+    // Touch events
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        signaturePad.startDrawing(e);
+    });
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        signaturePad.draw(e);
+    });
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        signaturePad.stopDrawing();
+        checkStep4Completion();
+    });
+    
+    // Signature controls
+    document.getElementById('clear-signature').addEventListener('click', () => {
+        signaturePad.clear();
+    });
+    
+    document.getElementById('load-saved-signature').addEventListener('click', () => {
+        // Load user's saved signature if available
+        const savedSignature = '{{ current_user.signature_data }}';
+        if (savedSignature) {
+            signaturePad.loadSignature(savedSignature);
+        } else {
+            alert('No saved signature found.');
+        }
+    });
+    
+    // Form validation
+    setupFormValidation();
+    
+    // Form submission
+    document.getElementById('claim-form').addEventListener('submit', handleFormSubmit);
+});
+
+function nextStep(step) {
+    if (step > currentStep + 1) return;
+    
+    // Validate current step
+    if (!validateStep(currentStep)) {
+        return;
+    }
+    
+    // Hide current step
+    document.getElementById(`content-${currentStep}`).classList.remove('active');
+    document.getElementById(`step-${currentStep}`).classList.remove('active');
+    document.getElementById(`step-${currentStep}`).classList.add('completed');
+    
+    // Show next step
+    currentStep = step;
+    document.getElementById(`content-${currentStep}`).classList.add('active');
+    document.getElementById(`step-${currentStep}`).classList.add('active');
+}
+
+function previousStep(step) {
+    if (step < 1) return;
+    
+    // Hide current step
+    document.getElementById(`content-${currentStep}`).classList.remove('active');
+    document.getElementById(`step-${currentStep}`).classList.remove('active');
+    
+    // Show previous step
+    currentStep = step;
+    document.getElementById(`content-${currentStep}`).classList.add('active');
+    document.getElementById(`step-${currentStep}`).classList.add('active');
+    document.getElementById(`step-${currentStep}`).classList.remove('completed');
+}
+
+function validateStep(step) {
+    switch (step) {
+        case 1:
+            const serialNumber = document.getElementById('serial_number').value.trim();
+            if (!serialNumber) {
+                alert('Please enter the device serial number.');
+                return false;
+            }
+            return true;
+            
+        case 2:
+            const testingCheckboxes = document.querySelectorAll('#content-2 input[type="checkbox"]');
+            const checkedCount = Array.from(testingCheckboxes).filter(cb => cb.checked).length;
+            if (checkedCount < 4) {
+                alert('Please complete at least 4 testing procedures before continuing.');
+                return false;
+            }
+            return true;
+            
+        case 3:
+            const verificationCheckboxes = document.querySelectorAll('#content-3 input[type="checkbox"]');
+            const verifiedCount = Array.from(verificationCheckboxes).filter(cb => cb.checked).length;
+            if (verifiedCount < 3) {
+                alert('Please complete at least 3 verification checks before continuing.');
+                return false;
+            }
+            return true;
+            
+        case 4:
+            if (signaturePad.isEmpty) {
+                alert('Please provide your digital signature.');
+                return false;
+            }
+            if (!document.getElementById('confirm-claim').checked) {
+                alert('Please confirm that you acknowledge responsibility for this device.');
+                return false;
+            }
+            return true;
+    }
+    return true;
+}
+
+function setupFormValidation() {
+    // Step 2 validation
+    const testingCheckboxes = document.querySelectorAll('#content-2 input[type="checkbox"]');
+    testingCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', checkStep2Completion);
+    });
+    
+    // Step 3 validation
+    const verificationCheckboxes = document.querySelectorAll('#content-3 input[type="checkbox"]');
+    verificationCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', checkStep3Completion);
+    });
+    
+    // Step 4 validation
+    document.getElementById('confirm-claim').addEventListener('change', checkStep4Completion);
+}
+
+function checkStep2Completion() {
+    const testingCheckboxes = document.querySelectorAll('#content-2 input[type="checkbox"]');
+    const checkedCount = Array.from(testingCheckboxes).filter(cb => cb.checked).length;
+    document.getElementById('testing-next').disabled = checkedCount < 4;
+    
+    // Visual feedback
+    testingCheckboxes.forEach(checkbox => {
+        const item = checkbox.closest('.checklist-item');
+        if (checkbox.checked) {
+            item.classList.add('completed');
+        } else {
+            item.classList.remove('completed');
+        }
+    });
+}
+
+function checkStep3Completion() {
+    const verificationCheckboxes = document.querySelectorAll('#content-3 input[type="checkbox"]');
+    const checkedCount = Array.from(verificationCheckboxes).filter(cb => cb.checked).length;
+    document.getElementById('verification-next').disabled = checkedCount < 3;
+    
+    // Visual feedback
+    verificationCheckboxes.forEach(checkbox => {
+        const item = checkbox.closest('.checklist-item');
+        if (checkbox.checked) {
+            item.classList.add('completed');
+        } else {
+            item.classList.remove('completed');
+        }
+    });
+}
+
+function checkStep4Completion() {
+    const confirmChecked = document.getElementById('confirm-claim').checked;
+    const hasSignature = !signaturePad.isEmpty;
+    document.getElementById('submit-claim').disabled = !(confirmChecked && hasSignature);
+}
+
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    if (!validateStep(4)) {
+        return;
+    }
+    
+    const submitBtn = document.getElementById('submit-claim');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    
+    try {
+        const formData = {
+            device_id: {{ device.id }},
+            serial_number: document.getElementById('serial_number').value.trim(),
+            testing_completed: Array.from(document.querySelectorAll('#content-2 input[type="checkbox"]:checked')).length >= 4,
+            verification_completed: Array.from(document.querySelectorAll('#content-3 input[type="checkbox"]:checked')).length >= 3,
+            testing_notes: document.getElementById('testing_notes').value.trim(),
+            verification_notes: document.getElementById('verification_notes').value.trim(),
+            claimer_signature: signaturePad.getDataURL()
+        };
+        
+        const response = await fetch('/focal/process_claim', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Device claimed successfully! You will be redirected to your dashboard.');
+            window.location.href = "{{ url_for('algon_dashboard') }}";
+        } else {
+            alert('Error claiming device: ' + result.error);
+        }
+        
+    } catch (error) {
+        console.error('Claim error:', error);
+        alert('An error occurred while processing your claim. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+}
+</script>
+{% endblock %}
