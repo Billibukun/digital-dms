@@ -1,0 +1,29 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/verxid-device-management', '.']
+
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/verxid-device-management']
+
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'verxid-device-management'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/verxid-device-management'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'FLASK_ENV=production,SECRET_KEY=your-secret-key-here'  # Change this to your secret key
+
+# Images created by the build
+images:
+  - 'gcr.io/$PROJECT_ID/verxid-device-management'

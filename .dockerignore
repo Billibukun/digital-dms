@@ -1,0 +1,15 @@
+.git
+.gitignore
+.gcloudignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+instance/
+.claude/
+logs/
+.zip
+error.txt
+README.md
+DEPLOYMENT_GUIDE.md
+FOCAL_LOGIN_GUIDE.md

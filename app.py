@@ -12,16 +12,36 @@ def create_app():
     # Configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or 'verxid-device-management-system-2024-change-in-production'
     
-    # Database configuration - use environment variable for production
-    database_url = os.environ.get('DATABASE_URL')
-    if not database_url:
-        # Default to SQLite in instance directory for local development
-        basedir = os.path.abspath(os.path.dirname(__file__))
-        database_url = 'sqlite:///' + os.path.join(basedir, 'instance', 'verxid_system.db')
+    # Database configuration
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    upload_folder = os.path.join(basedir, 'static', 'uploads')
+    os.makedirs(upload_folder, exist_ok=True)
     
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+    # Configure database URI based on environment
+    if os.getenv('DB_HOST'):  # Cloud SQL configuration
+        db_user = os.environ['DB_USER']
+        db_pass = os.environ['DB_PASS']
+        db_name = os.environ['DB_NAME']
+        db_host = os.environ['DB_HOST']
+        db_port = os.environ.get('DB_PORT', '5432')
+        
+        # When running in Cloud Run, connect via Unix socket
+        if os.getenv('CLOUD_SQL_CONNECTION_NAME'):
+            db_socket_dir = os.environ.get('DB_SOCKET_DIR', '/cloudsql')
+            cloud_sql_connection_name = os.environ['CLOUD_SQL_CONNECTION_NAME']
+            db_uri = f'postgresql+psycopg2://{db_user}:{db_pass}@/{db_name}?host={db_socket_dir}/{cloud_sql_connection_name}'
+        else:
+            # For local testing with Cloud SQL Proxy
+            db_uri = f'postgresql+psycopg2://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}'
+    else:
+        # Local SQLite configuration
+        db_path = os.path.join(basedir, 'instance', 'verxid_system.db')
+        db_uri = f'sqlite:///{db_path}'
+    
+    # Configure SQLAlchemy
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['UPLOAD_FOLDER'] = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'static', 'uploads')
+    app.config['UPLOAD_FOLDER'] = upload_folder
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
     
     # Initialize extensions with app

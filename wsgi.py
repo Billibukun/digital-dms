@@ -1,20 +1,15 @@
 """
-WSGI file for PythonAnywhere deployment
-VERXID Device Documentation Management System
+WSGI configuration for VERXID Device Documentation Management System
+Deployed on Google Cloud Run
 """
 
-import sys
 import os
-
-# Add the path to your app directory
-path = '/home/npcapps/dsm'  # Change this to your actual PythonAnywhere path
-if path not in sys.path:
-    sys.path.insert(0, path)
-
 from app import create_app
 
 # Create the application
 application = create_app()
 
 if __name__ == "__main__":
-    application.run()
+    # This is used when running locally
+    port = int(os.environ.get("PORT", 8080))
+    application.run(host="0.0.0.0", port=port, debug=False)
